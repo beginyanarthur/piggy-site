@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Piggy: money in bags, month by month</title>
+<meta name="description" content="Piggy is a budgeting app built around bags. Every bit of money you have goes into a bag, so you always know what is left for what. Your budget stays on your phone.">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400&display=swap">
+</head>
+<body>
+<style>
+  :root {
+    --paper: #FBFAF7;
+    --card: #FFFFFF;
+    --line: #DFDDD6;
+    --ink: #1B1A24;
+    --ink-dim: #55535F;
+    --pink: #B82A8E;
+    --teal: #0C7C6C;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #15161F;
+      --card: #1E1F2B;
+      --line: #32333F;
+      --ink: #EDECF2;
+      --ink-dim: #A7A5B4;
+      --pink: #F07FCB;
+      --teal: #3ACBB2;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #15161F;
+    --card: #1E1F2B;
+    --line: #32333F;
+    --ink: #EDECF2;
+    --ink-dim: #A7A5B4;
+    --pink: #F07FCB;
+    --teal: #3ACBB2;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.62;
+  }
+  .wrap { max-width: 680px; margin: 0 auto; padding-inline: 20px; padding-block: 52px 80px; }
+
+  h1, h2 { font-family: "Newsreader", Georgia, serif; font-weight: 600; margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(34px, 7.4vw, 50px); line-height: 1.04; letter-spacing: -0.015em; }
+  h2 { font-size: clamp(20px, 3.5vw, 24px); line-height: 1.2; }
+  p { margin: 0; }
+  a { color: var(--teal); }
+
+  header { display: flex; flex-direction: column; gap: 14px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+  .stamp {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-dim);
+  }
+  .summary {
+    font-family: "Newsreader", Georgia, serif;
+    font-size: clamp(19px, 3.4vw, 22px);
+    line-height: 1.45;
+  }
+  .summary b { color: var(--pink); font-weight: 600; }
+
+  section { display: flex; flex-direction: column; gap: 12px; margin-top: 38px; }
+  section p, section li { color: var(--ink-dim); }
+  section p strong, section li strong { color: var(--ink); font-weight: 600; }
+  ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+
+  .links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .link {
+    border: 1px solid var(--line); border-radius: 999px; background: var(--card);
+    padding: 9px 16px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 15.5px;
+  }
+  .link span { color: var(--ink-dim); font-weight: 400; }
+
+  .facts { border: 1px solid var(--line); border-radius: 12px; background: var(--card); overflow: hidden; }
+  .fact { display: grid; grid-template-columns: 200px 1fr; gap: 16px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+  .fact:last-child { border-bottom: 0; }
+  .fact dt { font-weight: 600; color: var(--ink); }
+  .fact dd { margin: 0; color: var(--ink-dim); }
+  @media (max-width: 560px) { .fact { grid-template-columns: 1fr; gap: 4px; } }
+
+  footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--ink-dim); font-size: 14.5px; display: flex; flex-direction: column; gap: 6px; }
+</style>
+
+<main class="wrap">
+  <header>
+    <p class="stamp">Piggy · iPhone · Beta</p>
+    <h1>Money in bags, month by month</h1>
+    <p class="summary">Every bit of money you have goes into a <b>bag</b>: rent, food, fun, a trip, savings. When money comes in you split it between your bags. When you spend, you take it from the bag it belongs to.</p>
+  </header>
+
+  <section>
+    <h2>What it does</h2>
+    <ul>
+      <li><strong>Give every dram a place.</strong> Make a bag for anything you spend on or put aside for, and split new income between them in one screen.</li>
+      <li><strong>Log a spend in seconds.</strong> The round button on any screen: pick a bag, type the amount.</li>
+      <li><strong>Plan ahead.</strong> Decide next month before it arrives, and fund it as your income comes in.</li>
+      <li><strong>Check your money.</strong> Count the cash and cards you really have, and see whether Piggy agrees.</li>
+      <li><strong>Know what you owe.</strong> Start a bag with a debt on it and watch it climb back to zero.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Your data stays with you</h2>
+    <p>Your budget lives on your phone. No bank connection, no ads, and no account on a server. Piggy counts anonymous events, such as "a bag was made", to see which parts of the app get used. No amounts, no bag names, no notes, and nothing that identifies you. You can turn it off in Settings.</p>
+    <p><a href="https://beginyanarthur.github.io/piggy-privacy/">Read the privacy policy</a></p>
+  </section>
+
+  <section>
+    <h2>Where it is</h2>
+    <p>Piggy is in a closed beta on iPhone, with a small group of testers. Every feature, including Golden Piggy, is unlocked while the beta runs. Follow the channel to hear when it opens up.</p>
+    <div class="links">
+      <a class="link" href="https://t.me/piggy_research">Telegram <span>news about Piggy</span></a>
+      <a class="link" href="https://www.linkedin.com/company/piggy-piggy-piggy/">LinkedIn <span>the story behind it</span></a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Questions or problems</h2>
+    <div class="facts">
+      <dl class="fact"><dt>Support</dt><dd><a href="https://beginyanarthur.github.io/piggy-privacy/support.html">The support page</a></dd></dl>
+      <dl class="fact"><dt>Email</dt><dd><a href="mailto:beginyan.arthur@gmail.com">beginyan.arthur@gmail.com</a></dd></dl>
+      <dl class="fact"><dt>News</dt><dd><a href="https://t.me/piggy_research">The Telegram channel</a>, for what is new. Help comes by email.</dd></dl>
+    </div>
+  </section>
+
+  <footer>
+    <p>Made in Armenia by Artur Beginyan.</p>
+    <p>Amounts are Armenian dram (֏).</p>
+  </footer>
+</main>
+</body>
+</html>
