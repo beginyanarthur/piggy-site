@@ -10,6 +10,7 @@
 <script>
   /* The reader's saved theme, set before the first paint so a page they
      chose dark does not flash light on the way in. */
+  document.documentElement.classList.add("js");
   try { var t = localStorage.getItem("piggy-theme"); if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
 </script>
 <meta property="og:title" content="Budgeting is not only about counting money">
@@ -54,6 +55,7 @@
     --pink-soft: #D42D971A; /* pigPink at a fill's weight, as incomeSoft is */
     --pink-strong: #A82278; /* pigPinkDark, a solid button pressed or hovered */
     --on-pink: #FFFFFF;     /* textInverse, words on a pink fill */
+    --income-soft: #0C74401A; /* incomeSoft, the wash behind "All allocated" */
 
     /* The app's face, which is the system's: SF Pro on Apple, and whatever
        the platform's own UI face is everywhere else. One typography across
@@ -76,7 +78,7 @@
       --card: #3A4066;
       --line: #FFFFFF24; --line-strong: #FFFFFF73;
       --ink: #FFFFFF; --ink-dim: #FFFFFFCC; --ink-muted: #FFFFFFA6;
-      --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-strong: #D6389C; --on-pink: #1B1E38;
+      --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-strong: #D6389C; --on-pink: #1B1E38; --income-soft: #3FDE851F;
     }
   }
   :root[data-theme="dark"] {
@@ -84,7 +86,7 @@
     --card: #3A4066;
     --line: #FFFFFF24; --line-strong: #FFFFFF73;
     --ink: #FFFFFF; --ink-dim: #FFFFFFCC; --ink-muted: #FFFFFFA6;
-    --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-strong: #D6389C; --on-pink: #1B1E38;
+    --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-strong: #D6389C; --on-pink: #1B1E38; --income-soft: #3FDE851F;
   }
 
   * { box-sizing: border-box; }
@@ -489,6 +491,76 @@
   .closing > h2 { font-size: clamp(var(--t-h1), 4.4vw, var(--t-amount)); }
   .closing > p { max-width: 34em; }
   .closing .actions { justify-content: center; }
+
+  /* ---------- Try it: the split, as the app counts it ---------- */
+  .try .income { display: flex; flex-direction: column; gap: var(--s-xs); max-width: 320px; }
+  .try .income > span:first-child { font-size: var(--t-caption); font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; color: var(--ink-muted); }
+  .field { display: flex; align-items: baseline; gap: var(--s-sm); border-bottom: 2px solid var(--pink); padding-bottom: var(--s-xs); }
+  .field input {
+    width: 100%; min-width: 0; border: 0; background: transparent; color: var(--ink); padding: 0;
+    font: 700 var(--t-amount)/1.2 var(--font); font-variant-numeric: tabular-nums;
+  }
+  .field input:focus-visible { outline: none; }
+  .field:focus-within { border-bottom-color: var(--pink-strong); }
+  .field b { font-size: var(--t-h2); color: var(--ink-dim); }
+  .bags { display: flex; flex-direction: column; gap: var(--s-md); }
+  .bag { display: grid; grid-template-columns: 40px 1fr auto; column-gap: var(--s-md); row-gap: 2px; align-items: center; }
+  .bag-i { grid-row: 1 / span 2; width: 40px; height: 40px; display: grid; place-items: center; border-radius: var(--r-md); background: var(--pink-soft); color: var(--pink); }
+  .bag label, .bag output { font-weight: 600; color: var(--ink); }
+  .bag input[type=range] { grid-column: 2 / span 2; width: 100%; height: 28px; margin: 0; accent-color: var(--pink); }
+  .left { display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--s-sm) var(--s-md); padding-top: var(--s-md); border-top: 1px solid var(--line); }
+  .left > span:first-child { color: var(--ink-dim); }
+  .left strong { font-size: var(--t-h1); font-weight: 700; color: var(--ink); }
+  .left.zero strong { color: var(--income); }
+  /* The app's "All allocated" pill: income green on its own wash. */
+  .done { align-self: center; font-size: var(--t-caption); font-weight: 600; color: var(--income); background: var(--income-soft); padding: 4px 10px; border-radius: var(--r-pill); }
+  .done::before { content: "● "; }
+  .note { font-size: 14.5px; color: var(--ink-muted); }
+
+  /* ---------- The month, one step at a time ---------- */
+  .month { display: flex; flex-direction: column; gap: var(--s-lg); max-width: 920px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: var(--s-sm); }
+  .tab {
+    display: inline-flex; align-items: center; gap: var(--s-sm); cursor: pointer;
+    min-height: 44px; padding: 6px 16px 6px 8px; font: 600 var(--t-body-app) var(--font);
+    color: var(--ink-dim); background: transparent; border: 1px solid var(--line-strong); border-radius: var(--r-pill);
+    transition: color 150ms ease-out, border-color 150ms ease-out, background-color 150ms ease-out;
+  }
+  .tab:hover { color: var(--ink); border-color: var(--pink); }
+  .tab[aria-selected="true"] { color: var(--ink); background: var(--card); border-color: var(--pink); }
+  .tab[aria-selected="true"] .step-no { background: var(--pink); color: var(--on-pink); border-color: var(--pink); }
+  .panel { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: var(--s-xxl); align-items: center; }
+  :root.js .panel:not(.on) { display: none; }
+  :root:not(.js) .panel + .panel { margin-top: var(--s-xl); }
+  .panel .shot { width: 100%; height: auto; }
+  .panel .said { display: flex; flex-direction: column; gap: var(--s-sm); align-items: flex-start; }
+  .panel .said h3 { margin: 0; font-size: var(--t-h1); font-weight: 700; line-height: 1.2; color: var(--ink); }
+  .panel .said p { color: var(--ink-dim); max-width: 32em; }
+  .next { margin-top: var(--s-xs); min-height: 44px; padding: 0; border: 0; background: none; color: var(--pink); font: 600 var(--t-body-app) var(--font); cursor: pointer; }
+  :root:not(.js) .next { display: none; }
+  @media (max-width: 720px) {
+    .tabs { flex-wrap: nowrap; overflow-x: auto; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scrollbar-width: none; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab { flex: none; white-space: nowrap; }
+    .panel { grid-template-columns: 1fr; gap: var(--s-lg); justify-items: center; text-align: center; }
+    .panel .shot { max-width: 220px; }
+    .panel .said { align-items: center; }
+  }
+
+  /* ---------- Which one are you ---------- */
+  .minis { align-items: stretch; }
+  .pick {
+    display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: var(--s-md); align-items: start; text-align: left;
+    padding: var(--s-md); background: transparent; color: var(--ink-dim); cursor: pointer;
+    border: 1px solid var(--line-strong); border-radius: var(--r-md); font: 400 var(--t-body-app)/1.5 var(--font);
+    transition: border-color 150ms ease-out, background-color 150ms ease-out;
+  }
+  .pick > span { display: flex; flex-direction: column; gap: var(--s-xs); }
+  .pick b { font-size: var(--t-h3); font-weight: 600; color: var(--ink); }
+  .pick .ion { width: 40px; height: 40px; padding: 9px; border-radius: var(--r-md); background: var(--pink-soft); color: var(--pink); }
+  .pick:hover { border-color: var(--pink); }
+  /* Chosen: a 2px pink edge on the pink wash, the padding one less so nothing shifts. */
+  .pick[aria-checked="true"] { border: 2px solid var(--pink); padding: calc(var(--s-md) - 1px); background: var(--pink-soft); }
 </style>
 </head>
 <body>
@@ -538,6 +610,35 @@
 
 <main class="wrap wide">
 
+  <!--
+    The idea in ten seconds: type what came in, share it between three
+    example bags, and watch what is left to allocate count down to zero, as
+    it does in the app. It runs on this page only; nothing typed is sent.
+  -->
+  <section id="try">
+    <div class="feature try">
+      <div class="head">
+        <p class="kicker">Try it</p>
+        <h2>Where would this month's money go?</h2>
+      </div>
+      <label class="income">
+        <span>Money that came in</span>
+        <span class="field"><input id="income" type="text" inputmode="numeric" autocomplete="off" value="400,000" aria-describedby="try-note"><b>֏</b></span>
+      </label>
+      <div class="bags">
+        <div class="bag"><span class="bag-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.44 1.6Q12.23 1.32 12.89 1.79Q12.98 1.88 14.39 3.19L15.75 4.51V3.62Q15.8 2.72 15.84 2.68Q15.98 2.4 16.27 2.3Q16.36 2.26 17.67 2.26H18.94L19.12 2.35Q19.31 2.49 19.41 2.63L19.5 2.82V5.49L19.55 8.12L21.28 9.8Q23.06 11.49 23.11 11.63Q23.3 11.82 23.2 12.19Q23.2 12.38 22.97 12.57Q22.73 12.76 22.5 12.76Q22.17 12.76 21.52 12.1L21 11.63V16.51Q21 21.33 20.91 21.52Q20.67 22.13 20.02 22.41L19.78 22.51H17.3H14.81L14.62 22.41Q14.44 22.27 14.34 22.13L14.25 21.99V18.62L14.2 15.19L14.11 15.1L14.02 15.01H12H9.98L9.89 15.1L9.8 15.19L9.75 18.62V21.99L9.66 22.13Q9.56 22.27 9.38 22.41L9.19 22.51H6.7H4.22L3.98 22.41Q3.28 22.13 3.09 21.47Q3 21.24 3 16.44Q3 11.63 2.98 11.63Q2.95 11.63 2.44 12.15Q1.69 12.9 1.22 12.71Q0.52 12.38 0.8 11.72Q0.89 11.58 1.45 11.02Q2.25 10.22 6.63 6.05Q11.02 1.88 11.11 1.79Q11.2 1.69 11.44 1.6ZM15.75 6.57Q12.05 3.01 12.02 3.01Q12 3.01 8.25 6.57L4.5 10.13V15.57V21.01H6.38H8.25V18.01V15.01L8.34 14.72Q8.67 14.02 9.38 13.65L9.61 13.55H12H14.39L14.62 13.65Q15.33 14.02 15.66 14.72L15.75 15.01V18.01V21.01H17.62H19.5V15.57V10.13ZM18 5.21V3.76H17.62H17.25V4.83V5.96L17.62 6.29L18 6.66Z"/></svg></span><label for="b-rent">Rent</label><output class="num" for="b-rent" id="o-rent"></output><input type="range" id="b-rent" min="0" max="400000" step="5000" value="150000"></div>
+        <div class="bag"><span class="bag-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.61 0.84Q16.12 0.7 16.31 0.79Q16.41 0.84 16.45 0.98Q16.5 1.12 16.45 1.49Q16.17 2.85 15.19 3.88Q14.25 4.82 12.84 5.15Q12.28 5.29 12.09 5.1Q11.95 4.96 12.09 4.35Q12.38 3.04 13.34 2.08Q14.3 1.12 15.61 0.84ZM7.31 5.24Q7.83 5.2 8.58 5.29Q9 5.34 9.98 5.62Q11.48 5.99 12 5.99Q12.52 5.99 13.97 5.62Q15 5.34 15.47 5.29Q17.53 5.01 19.12 6.13Q20.11 6.84 20.72 8.1Q21.56 9.79 21.7 12.6Q21.8 14.29 21.42 15.88Q20.91 18.13 19.66 20.13Q18.42 22.12 17.11 22.87Q16.5 23.2 15.84 23.24Q14.48 23.29 13.03 22.49Q12.38 22.12 12 22.12Q11.62 22.12 10.97 22.49Q9.52 23.29 8.16 23.24Q7.5 23.2 6.89 22.87Q5.58 22.12 4.34 20.13Q3.09 18.13 2.58 15.88Q2.2 14.29 2.25 12.65Q2.44 9.32 3.66 7.49Q4.92 5.57 7.31 5.24ZM7.97 6.79Q7.22 6.74 6.7 6.93Q6 7.17 5.44 7.73Q4.92 8.24 4.55 8.95Q3.75 10.68 3.75 13.35Q3.75 15.74 5.06 18.32Q5.72 19.63 6.52 20.57Q7.31 21.51 7.97 21.7Q8.2 21.74 8.62 21.74Q9.38 21.65 10.22 21.18Q10.78 20.9 11.11 20.78Q11.44 20.67 12 20.67Q12.56 20.67 12.89 20.78Q13.22 20.9 13.78 21.18Q14.62 21.65 15.38 21.74Q15.8 21.74 16.03 21.7Q16.69 21.51 17.48 20.57Q18.28 19.63 18.94 18.32Q19.97 16.21 20.2 14.2Q20.34 13.07 20.16 11.53Q19.73 7.96 17.72 7.07Q17.06 6.79 16.12 6.79H15.47L14.34 7.07Q12.75 7.49 12 7.49Q11.25 7.49 10.03 7.17Q9.38 6.98 8.95 6.88Q8.53 6.79 7.97 6.79ZM9.84 12.09Q10.12 11.95 10.41 12.09Q10.88 12.32 11.11 13.21Q11.2 13.54 11.23 14.22Q11.25 14.9 11.16 15.23Q10.97 15.88 10.64 16.21Q10.31 16.54 9.98 16.45Q9.42 16.31 9.09 15.23Q9 14.9 9.02 14.24Q9.05 13.59 9.09 13.26Q9.38 12.28 9.84 12.09ZM13.59 12.09Q13.59 12.09 13.59 12.09Q14.25 11.71 14.67 12.7Q14.95 13.31 14.95 14.24Q15 14.9 14.91 15.23Q14.58 16.31 14.02 16.47Q13.45 16.63 13.08 15.79Q12.8 15.18 12.8 14.24Q12.8 13.54 12.89 13.21Q13.12 12.32 13.59 12.09Z"/></svg></span><label for="b-food">Food</label><output class="num" for="b-food" id="o-food"></output><input type="range" id="b-food" min="0" max="400000" step="5000" value="90000"></div>
+        <div class="bag"><span class="bag-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10.83 1.53Q11.2 1.53 11.95 1.53Q12.7 1.53 13.12 1.53Q13.55 1.58 14.06 1.67Q16.64 2.19 18.7 3.9Q20.77 5.61 21.75 8.05Q23.02 11.28 22.15 14.63Q21.28 17.99 18.61 20.14Q16.12 22.11 13.03 22.41Q9.94 22.72 7.12 21.27Q4.41 19.86 2.88 17.16Q1.36 14.47 1.5 11.38Q1.64 9.13 2.72 7.11Q3.7 5.19 5.39 3.83Q6.7 2.75 8.3 2.19Q9.56 1.67 10.83 1.53ZM13.31 3.08Q12.23 2.94 11.34 3.03Q10.12 3.13 9.14 3.45Q5.58 4.63 3.94 8.05Q3 9.88 3 11.99Q3 13.16 3.28 14.14Q3.98 17.09 6.38 19.02Q9.33 21.36 13.03 20.94Q15.33 20.66 17.2 19.32Q19.08 17.99 20.06 15.92Q21 14.09 21 11.99Q21 10.39 20.48 8.99Q20.16 8 19.55 7.11Q17.3 3.69 13.31 3.08ZM9 9.83Q9.42 9.92 9.63 10.34Q9.84 10.77 9.7 11.14Q9.47 11.89 8.72 11.99Q8.02 12.03 7.66 11.45Q7.31 10.86 7.64 10.3Q7.83 10.02 8.2 9.83Q8.58 9.64 9 9.83ZM14.95 9.83Q15.42 9.64 15.89 9.88Q16.69 10.25 16.45 11.14Q16.31 11.66 15.82 11.89Q15.33 12.13 14.81 11.84Q14.16 11.47 14.25 10.77Q14.34 10.02 14.95 9.83ZM7.73 14.28Q7.73 14.28 7.73 14.28Q7.83 14.24 12.05 14.24Q12.05 14.24 16.27 14.24L16.36 14.33Q16.55 14.52 16.41 14.89Q16.08 15.88 15.3 16.65Q14.53 17.42 13.5 17.75Q12.8 17.99 12 17.99Q11.2 17.99 10.5 17.75Q8.39 17.05 7.59 14.99Q7.41 14.42 7.73 14.28Z"/></svg></span><label for="b-fun">Fun</label><output class="num" for="b-fun" id="o-fun"></output><input type="range" id="b-fun" min="0" max="400000" step="5000" value="40000"></div>
+      </div>
+      <div class="left" aria-live="polite">
+        <span>Left to allocate</span>
+        <strong class="num" id="left">120,000 ֏</strong>
+        <span class="done" id="done" hidden>All allocated</span>
+      </div>
+      <p class="note" id="try-note">An example on this page only. Nothing you type is sent anywhere.</p>
+    </div>
+  </section>
+
   <section id="what">
     <p class="kicker">The idea</p>
     <h2>What Piggy does</h2>
@@ -553,47 +654,54 @@
 
   <section id="how">
     <p class="kicker">How it goes</p>
-    <h2>A month with Piggy</h2>
-    <p class="lead-in">Five steps, every month. They change a little each time, because what you want changes.</p>
-
-    <div class="walk">
-      <div class="row">
-        <img class="shot" src="art/income.webp" alt="Add income: 750,000 dram typed in, a field for where it came from, and the date" width="1003" height="2000" loading="lazy">
+    <h2>What does a month look like?</h2>
+    <p class="lead-in">Five steps, every month. Tap one to see it.</p>
+    <div class="month">
+      <div class="tabs" role="tablist" aria-label="The five steps of a month">
+        <button class="tab" type="button" role="tab" id="tab-1" aria-controls="step-1" aria-selected="true"><span class="step-no">1</span><span>Money in</span></button>
+        <button class="tab" type="button" role="tab" id="tab-2" aria-controls="step-2" aria-selected="false" tabindex="-1"><span class="step-no">2</span><span>A new bag</span></button>
+        <button class="tab" type="button" role="tab" id="tab-3" aria-controls="step-3" aria-selected="false" tabindex="-1"><span class="step-no">3</span><span>Spend</span></button>
+        <button class="tab" type="button" role="tab" id="tab-4" aria-controls="step-4" aria-selected="false" tabindex="-1"><span class="step-no">4</span><span>Check</span></button>
+        <button class="tab" type="button" role="tab" id="tab-5" aria-controls="step-5" aria-selected="false" tabindex="-1"><span class="step-no">5</span><span>Plan</span></button>
+      </div>
+      <div class="panel on" role="tabpanel" id="step-1" aria-labelledby="tab-1">
+        <img class="shot" src="art/income.webp" alt="Add income: 750,000 dram typed in, a field for where it came from, and the date" width="1003" height="2000">
         <div class="said">
-          <h3><span class="step-no">1</span><span>Money comes in</span></h3>
+          <h3>Money comes in</h3>
           <p>Your salary, a side job, a gift. Piggy holds it until you say where it goes. Give each bag its share, and what is left to allocate counts down to zero.</p>
+          <button class="next" type="button" data-next="2">Next: a want becomes a bag ›</button>
         </div>
       </div>
-
-      <div class="row">
+      <div class="panel" role="tabpanel" id="step-2" aria-labelledby="tab-2">
         <img class="shot" src="art/bag-trip.webp" alt="A trip bag with an airport photo on top: 230,000 dram left to spend of 250,000 allocated, and its history" width="1003" height="2000" loading="lazy">
         <div class="said">
-          <h3><span class="step-no">2</span><span>A want becomes a bag</span></h3>
+          <h3>A want becomes a bag</h3>
           <p>A trip in June. A laptop. Money for the month everything goes wrong. Make a bag for it, give it what you can, and it starts filling up.</p>
+          <button class="next" type="button" data-next="3">Next: you spend from a bag ›</button>
         </div>
       </div>
-
-      <div class="row">
+      <div class="panel" role="tabpanel" id="step-3" aria-labelledby="tab-3">
         <img class="shot" src="art/spend.webp" alt="The log a spend sheet: bags grouped into essentials, everyday, saving for and owing, each showing what is left in it" width="1073" height="2000" loading="lazy">
         <div class="said">
-          <h3><span class="step-no">3</span><span>You spend from a bag</span></h3>
+          <h3>You spend from a bag</h3>
           <p>Tap the button, pick the bag, type the amount. Each bag shows what is left while you choose, so you know before you spend and not after.</p>
+          <button class="next" type="button" data-next="4">Next: you check the real money ›</button>
         </div>
       </div>
-
-      <div class="row">
+      <div class="panel" role="tabpanel" id="step-4" aria-labelledby="tab-4">
         <img class="shot" src="art/check.webp" alt="The money check: what your bags hold, with a button to count what you really have" width="1003" height="2000" loading="lazy">
         <div class="said">
-          <h3><span class="step-no">4</span><span>You check the real money</span></h3>
+          <h3>You check the real money</h3>
           <p>Does Piggy match the money you really have? Count your cash and cards to find out. If the two do not agree, Piggy helps you fix the difference.</p>
+          <button class="next" type="button" data-next="5">Next: you plan the next month ›</button>
         </div>
       </div>
-
-      <div class="row">
+      <div class="panel" role="tabpanel" id="step-5" aria-labelledby="tab-5">
         <img class="shot" src="art/plan.webp" alt="Start planning October: copy September's bags and amounts, or start from scratch" width="1003" height="2000" loading="lazy">
         <div class="said">
-          <h3><span class="step-no">5</span><span>You plan the next month</span></h3>
+          <h3>You plan the next month</h3>
           <p>Most months look like the one before. Copy the last one or start from scratch, then change what needs changing. More here, less there, and it starts again.</p>
+          <button class="next" type="button" data-next="1">Back to the start ›</button>
         </div>
       </div>
     </div>
@@ -606,15 +714,16 @@
   <section id="review">
     <div class="feature">
       <div class="head">
-        <h2>Budget reviews, one to one</h2>
+        <p class="kicker">Budget reviews, one to one</p>
+        <h2>Not sure where to begin?</h2>
         <p class="lead-in">A video call in Armenian or English. You talk, I listen, and we look at your money together.</p>
       </div>
-      <ul class="minis">
-        <li><svg class="ion" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.59 1.52Q19.92 1.52 20.62 1.52Q21.84 1.52 22.17 1.9Q22.36 2.13 22.41 2.6Q22.59 3.4 22.45 4.48Q22.17 6.68 21.02 9.19Q19.88 11.7 18.33 13.57Q17.3 14.84 16.08 15.77L15.8 16.01V16.62Q15.75 17.55 15.52 18.3Q14.81 20.46 12.47 21.63Q10.78 22.48 9.61 22.48Q9.19 22.48 8.86 22.17Q8.53 21.87 8.48 21.4Q8.48 21.26 8.67 19.71L8.81 18.16H8.72Q8.3 18.07 8.04 17.88Q7.78 17.7 7.03 16.95Q6.28 16.2 6.09 15.94Q5.91 15.68 5.86 15.35L5.81 15.12L5.62 15.16Q5.48 15.16 4.08 15.35Q2.48 15.49 2.11 15.35Q1.78 15.16 1.59 14.74Q1.41 14.32 1.78 13.01Q2.34 10.99 3.56 9.77Q5.16 8.18 7.69 8.18H7.97L8.25 7.8Q9.84 5.84 12.23 4.34Q16.03 1.99 19.59 1.52ZM20.95 3.07Q20.91 3.02 20.53 2.98Q18.19 2.93 14.67 4.71Q11.11 6.49 9.14 9.07Q8.86 9.45 8.72 9.59L8.58 9.68L7.64 9.73Q6.56 9.73 6 9.91Q4.17 10.57 3.38 12.96Q3.05 13.85 3.09 13.9Q3.09 13.95 4.71 13.76Q6.33 13.57 6.54 13.57Q6.75 13.57 6.94 13.71Q7.22 13.9 7.27 14.6L7.31 15.12L8.11 15.87L8.86 16.66L9.38 16.71Q9.98 16.76 10.22 16.95Q10.41 17.18 10.41 17.46Q10.41 17.65 10.22 19.27Q10.03 20.88 10.03 20.88Q10.12 20.98 11.16 20.55Q13.73 19.62 14.2 17.46Q14.25 17.18 14.3 16.29Q14.3 15.49 14.37 15.33Q14.44 15.16 14.91 14.84Q16.41 13.66 17.58 12.12Q20.2 8.6 20.86 4.76Q20.95 4.34 20.98 3.73Q21 3.12 20.95 3.07ZM17.86 7.34Q18.19 7.99 18.14 8.7Q18.09 9.63 17.53 10.34Q16.59 11.41 15.23 11.32Q14.2 11.23 13.5 10.52Q12.66 9.63 12.7 8.46Q12.75 7.38 13.45 6.68Q14.16 5.98 15.05 5.86Q15.94 5.74 16.71 6.16Q17.48 6.59 17.86 7.34ZM15.98 7.48Q15.8 7.38 15.47 7.34Q14.86 7.34 14.48 7.76Q14.2 8.09 14.2 8.55Q14.2 9.12 14.62 9.49Q14.95 9.82 15.49 9.8Q16.03 9.77 16.34 9.42Q16.64 9.07 16.64 8.55Q16.64 7.8 15.98 7.48ZM4.64 15.82Q4.64 15.82 4.64 15.82Q5.53 15.59 5.81 16.15Q5.95 16.43 5.81 16.78Q5.67 17.13 5.34 17.18Q4.69 17.32 4.43 17.62Q4.17 17.93 3.98 18.77Q3.75 20.09 3.8 20.18Q3.84 20.18 4.5 20.09Q5.16 19.99 5.48 19.9Q5.86 19.8 6.09 19.66Q6.61 19.43 6.8 18.63Q6.84 18.35 7.17 18.19Q7.5 18.02 7.83 18.16Q8.48 18.49 8.11 19.52Q7.59 20.93 5.77 21.4Q5.06 21.54 4.05 21.66Q3.05 21.77 2.81 21.68Q2.39 21.59 2.3 21.16Q2.2 20.93 2.32 19.85Q2.44 18.77 2.62 18.12Q2.95 16.85 3.61 16.34Q4.08 15.96 4.64 15.82Z"/></svg><span><b>Start</b>You want to begin. We set up your bags together.</span></li>
-        <li><svg class="ion" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.91 1.97Q11.91 1.97 11.91 1.97Q12.09 1.93 12.38 2.07Q12.47 2.12 14.46 4.11Q16.45 6.1 16.48 6.29Q16.5 6.47 16.5 6.52Q16.5 6.57 16.48 6.69Q16.45 6.8 14.44 8.82Q12.42 10.83 12.28 10.93Q12 11.02 11.72 10.93Q11.25 10.74 11.25 10.22Q11.25 9.99 11.48 9.71Q11.72 9.43 12.7 8.44Q13.12 8.02 13.41 7.74Q13.69 7.46 13.83 7.29Q13.97 7.13 13.97 7.13Q13.92 7.08 12.8 7.04Q11.2 7.04 10.36 7.27Q8.67 7.69 7.38 8.91Q6.09 10.13 5.58 11.77Q4.92 13.88 5.58 15.85Q6.28 17.96 8.04 19.25Q9.8 20.54 12 20.54Q14.2 20.54 15.98 19.22Q17.77 17.91 18.42 15.8Q18.66 15.05 18.7 14.16Q18.75 13.6 18.84 13.41Q18.94 13.22 19.22 13.08Q19.5 12.99 19.78 13.08Q20.25 13.32 20.25 13.97Q20.25 15.1 19.83 16.37Q19.22 18.19 17.84 19.58Q16.45 20.96 14.62 21.62Q12 22.46 9.38 21.62Q7.12 20.87 5.62 19.04Q4.12 17.21 3.8 14.87Q3.7 13.83 3.8 12.85Q4.08 10.74 5.27 9.03Q6.47 7.32 8.39 6.38Q9.56 5.82 10.83 5.63Q11.25 5.54 12.33 5.54Q13.41 5.54 13.59 5.58Q13.59 5.58 13.83 5.63L12.56 4.37Q11.58 3.38 11.41 3.15Q11.25 2.91 11.25 2.68Q11.25 2.49 11.41 2.28Q11.58 2.07 11.77 2.02Q11.86 2.02 11.91 1.97Z"/></svg><span><b>Check up</b>You already budget. We look at a month and find what to change.</span></li>
-      </ul>
+      <div class="minis" role="radiogroup" aria-label="Which one are you?">
+        <button class="pick" type="button" role="radio" aria-checked="false" data-kind="start"><svg class="ion" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.59 1.52Q19.92 1.52 20.62 1.52Q21.84 1.52 22.17 1.9Q22.36 2.13 22.41 2.6Q22.59 3.4 22.45 4.48Q22.17 6.68 21.02 9.19Q19.88 11.7 18.33 13.57Q17.3 14.84 16.08 15.77L15.8 16.01V16.62Q15.75 17.55 15.52 18.3Q14.81 20.46 12.47 21.63Q10.78 22.48 9.61 22.48Q9.19 22.48 8.86 22.17Q8.53 21.87 8.48 21.4Q8.48 21.26 8.67 19.71L8.81 18.16H8.72Q8.3 18.07 8.04 17.88Q7.78 17.7 7.03 16.95Q6.28 16.2 6.09 15.94Q5.91 15.68 5.86 15.35L5.81 15.12L5.62 15.16Q5.48 15.16 4.08 15.35Q2.48 15.49 2.11 15.35Q1.78 15.16 1.59 14.74Q1.41 14.32 1.78 13.01Q2.34 10.99 3.56 9.77Q5.16 8.18 7.69 8.18H7.97L8.25 7.8Q9.84 5.84 12.23 4.34Q16.03 1.99 19.59 1.52ZM20.95 3.07Q20.91 3.02 20.53 2.98Q18.19 2.93 14.67 4.71Q11.11 6.49 9.14 9.07Q8.86 9.45 8.72 9.59L8.58 9.68L7.64 9.73Q6.56 9.73 6 9.91Q4.17 10.57 3.38 12.96Q3.05 13.85 3.09 13.9Q3.09 13.95 4.71 13.76Q6.33 13.57 6.54 13.57Q6.75 13.57 6.94 13.71Q7.22 13.9 7.27 14.6L7.31 15.12L8.11 15.87L8.86 16.66L9.38 16.71Q9.98 16.76 10.22 16.95Q10.41 17.18 10.41 17.46Q10.41 17.65 10.22 19.27Q10.03 20.88 10.03 20.88Q10.12 20.98 11.16 20.55Q13.73 19.62 14.2 17.46Q14.25 17.18 14.3 16.29Q14.3 15.49 14.37 15.33Q14.44 15.16 14.91 14.84Q16.41 13.66 17.58 12.12Q20.2 8.6 20.86 4.76Q20.95 4.34 20.98 3.73Q21 3.12 20.95 3.07ZM17.86 7.34Q18.19 7.99 18.14 8.7Q18.09 9.63 17.53 10.34Q16.59 11.41 15.23 11.32Q14.2 11.23 13.5 10.52Q12.66 9.63 12.7 8.46Q12.75 7.38 13.45 6.68Q14.16 5.98 15.05 5.86Q15.94 5.74 16.71 6.16Q17.48 6.59 17.86 7.34ZM15.98 7.48Q15.8 7.38 15.47 7.34Q14.86 7.34 14.48 7.76Q14.2 8.09 14.2 8.55Q14.2 9.12 14.62 9.49Q14.95 9.82 15.49 9.8Q16.03 9.77 16.34 9.42Q16.64 9.07 16.64 8.55Q16.64 7.8 15.98 7.48ZM4.64 15.82Q4.64 15.82 4.64 15.82Q5.53 15.59 5.81 16.15Q5.95 16.43 5.81 16.78Q5.67 17.13 5.34 17.18Q4.69 17.32 4.43 17.62Q4.17 17.93 3.98 18.77Q3.75 20.09 3.8 20.18Q3.84 20.18 4.5 20.09Q5.16 19.99 5.48 19.9Q5.86 19.8 6.09 19.66Q6.61 19.43 6.8 18.63Q6.84 18.35 7.17 18.19Q7.5 18.02 7.83 18.16Q8.48 18.49 8.11 19.52Q7.59 20.93 5.77 21.4Q5.06 21.54 4.05 21.66Q3.05 21.77 2.81 21.68Q2.39 21.59 2.3 21.16Q2.2 20.93 2.32 19.85Q2.44 18.77 2.62 18.12Q2.95 16.85 3.61 16.34Q4.08 15.96 4.64 15.82Z"/></svg><span><b>I want to start</b>We set up your bags together.</span></button>
+        <button class="pick" type="button" role="radio" aria-checked="false" data-kind="check"><svg class="ion" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.91 1.97Q11.91 1.97 11.91 1.97Q12.09 1.93 12.38 2.07Q12.47 2.12 14.46 4.11Q16.45 6.1 16.48 6.29Q16.5 6.47 16.5 6.52Q16.5 6.57 16.48 6.69Q16.45 6.8 14.44 8.82Q12.42 10.83 12.28 10.93Q12 11.02 11.72 10.93Q11.25 10.74 11.25 10.22Q11.25 9.99 11.48 9.71Q11.72 9.43 12.7 8.44Q13.12 8.02 13.41 7.74Q13.69 7.46 13.83 7.29Q13.97 7.13 13.97 7.13Q13.92 7.08 12.8 7.04Q11.2 7.04 10.36 7.27Q8.67 7.69 7.38 8.91Q6.09 10.13 5.58 11.77Q4.92 13.88 5.58 15.85Q6.28 17.96 8.04 19.25Q9.8 20.54 12 20.54Q14.2 20.54 15.98 19.22Q17.77 17.91 18.42 15.8Q18.66 15.05 18.7 14.16Q18.75 13.6 18.84 13.41Q18.94 13.22 19.22 13.08Q19.5 12.99 19.78 13.08Q20.25 13.32 20.25 13.97Q20.25 15.1 19.83 16.37Q19.22 18.19 17.84 19.58Q16.45 20.96 14.62 21.62Q12 22.46 9.38 21.62Q7.12 20.87 5.62 19.04Q4.12 17.21 3.8 14.87Q3.7 13.83 3.8 12.85Q4.08 10.74 5.27 9.03Q6.47 7.32 8.39 6.38Q9.56 5.82 10.83 5.63Q11.25 5.54 12.33 5.54Q13.41 5.54 13.59 5.58Q13.59 5.58 13.83 5.63L12.56 4.37Q11.58 3.38 11.41 3.15Q11.25 2.91 11.25 2.68Q11.25 2.49 11.41 2.28Q11.58 2.07 11.77 2.02Q11.86 2.02 11.91 1.97Z"/></svg><span><b>I already budget</b>We look at a month and find what to change.</span></button>
+      </div>
       <div class="actions">
-        <a class="btn" href="mailto:beginyan.arthur@gmail.com?subject=Budget%20review%3A%20please%20send%20me%20the%20price&amp;body=Hi%20Artur%2C%0A%0AI%20am%20interested%20in%20a%20budget%20review.%20Please%20send%20me%20the%20price.%0A%0AStart%20or%20check%20up%3A%20%0AArmenian%20or%20English%3A%20%0A"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.52 3.84Q3.8 3.75 11.98 3.75Q20.16 3.75 20.44 3.8Q21.14 3.98 21.68 4.5Q22.22 5.02 22.41 5.72Q22.5 6 22.5 12Q22.5 18 22.41 18.28Q21.98 19.78 20.53 20.16Q20.25 20.25 12 20.25Q3.75 20.25 3.47 20.16Q2.95 20.02 2.48 19.64Q1.83 19.12 1.59 18.28Q1.5 18 1.5 12Q1.5 6 1.59 5.72Q1.73 5.2 2.06 4.78Q2.62 4.03 3.52 3.84ZM20.34 5.34 20.16 5.25H12.09Q4.08 5.25 3.89 5.3Q3.38 5.39 3.09 5.91L3 6.05V12V17.95L3.09 18.09Q3.33 18.47 3.66 18.66L3.84 18.75H12H20.16L20.34 18.66Q20.72 18.47 20.91 18.09L21 17.91V12V6.09L20.91 5.91Q20.72 5.53 20.34 5.34ZM4.92 6.84Q4.92 6.84 4.92 6.84Q5.25 6.66 5.58 6.84Q5.72 6.89 8.86 9.38Q8.86 9.38 12 11.81L15.14 9.38Q18.28 6.89 18.42 6.84Q18.7 6.7 19.01 6.8Q19.31 6.89 19.41 7.17Q19.5 7.31 19.5 7.5Q19.5 7.69 19.43 7.8Q19.36 7.92 19.27 8.06Q19.08 8.2 15.75 10.78Q12.42 13.36 12.33 13.41Q12 13.59 11.67 13.41Q11.58 13.36 8.25 10.78Q4.92 8.2 4.73 8.06Q4.5 7.83 4.5 7.5Q4.5 7.03 4.92 6.84Z"/></svg>I am interested</a>
+        <a class="btn" id="review-btn" href="mailto:beginyan.arthur@gmail.com?subject=Budget%20review%3A%20please%20send%20me%20the%20price&amp;body=Hi%20Artur%2C%0A%0AI%20am%20interested%20in%20a%20budget%20review.%20Please%20send%20me%20the%20price.%0A%0AStart%20or%20check%20up%3A%20%0AArmenian%20or%20English%3A%20%0A"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.52 3.84Q3.8 3.75 11.98 3.75Q20.16 3.75 20.44 3.8Q21.14 3.98 21.68 4.5Q22.22 5.02 22.41 5.72Q22.5 6 22.5 12Q22.5 18 22.41 18.28Q21.98 19.78 20.53 20.16Q20.25 20.25 12 20.25Q3.75 20.25 3.47 20.16Q2.95 20.02 2.48 19.64Q1.83 19.12 1.59 18.28Q1.5 18 1.5 12Q1.5 6 1.59 5.72Q1.73 5.2 2.06 4.78Q2.62 4.03 3.52 3.84ZM20.34 5.34 20.16 5.25H12.09Q4.08 5.25 3.89 5.3Q3.38 5.39 3.09 5.91L3 6.05V12V17.95L3.09 18.09Q3.33 18.47 3.66 18.66L3.84 18.75H12H20.16L20.34 18.66Q20.72 18.47 20.91 18.09L21 17.91V12V6.09L20.91 5.91Q20.72 5.53 20.34 5.34ZM4.92 6.84Q4.92 6.84 4.92 6.84Q5.25 6.66 5.58 6.84Q5.72 6.89 8.86 9.38Q8.86 9.38 12 11.81L15.14 9.38Q18.28 6.89 18.42 6.84Q18.7 6.7 19.01 6.8Q19.31 6.89 19.41 7.17Q19.5 7.31 19.5 7.5Q19.5 7.69 19.43 7.8Q19.36 7.92 19.27 8.06Q19.08 8.2 15.75 10.78Q12.42 13.36 12.33 13.41Q12 13.59 11.67 13.41Q11.58 13.36 8.25 10.78Q4.92 8.2 4.73 8.06Q4.5 7.83 4.5 7.5Q4.5 7.03 4.92 6.84Z"/></svg><span id="review-label">I am interested</span></a>
         <a class="quiet-link" href="reviews.html">See how it works</a>
       </div>
     </div>
@@ -719,6 +828,99 @@
   // Until they press it, the page still follows the system as it changes.
   media.addEventListener("change", function () { if (!root.getAttribute("data-theme")) sync(); });
 })();
+</script>
+<script>
+  // Try it: share what came in between three bags, and count what is left.
+  (function () {
+    var income = document.getElementById("income");
+    if (!income) return;
+    var ids = ["rent", "food", "fun"];
+    function fmt(n) { return n.toLocaleString("en-US") + " ֏"; }
+    function total() {
+      var n = parseInt(income.value.replace(/[^0-9]/g, ""), 10);
+      return isNaN(n) ? 0 : Math.min(n, 99999999);
+    }
+    function range(id) { return document.getElementById("b-" + id); }
+    function given(except) {
+      return ids.reduce(function (a, id) { return id === except ? a : a + Number(range(id).value); }, 0);
+    }
+    function draw(moved) {
+      var t = total();
+      // The bag being dragged stops at what the other two have left it; it
+      // never takes money back from them. When the income shrinks instead,
+      // the bags give way in order, the last one first.
+      var order = moved ? [moved] : ids.slice().reverse();
+      ids.forEach(function (id) { range(id).max = t; });
+      order.forEach(function (id) {
+        var r = range(id);
+        var room = Math.max(0, t - given(id));
+        if (Number(r.value) > room) r.value = room;
+      });
+      ids.forEach(function (id) {
+        document.getElementById("o-" + id).textContent = fmt(Number(range(id).value));
+      });
+      var left = t - given();
+      var zero = left === 0 && t > 0;
+      document.getElementById("left").textContent = fmt(left);
+      document.getElementById("done").hidden = !zero;
+      document.querySelector(".left").classList.toggle("zero", zero);
+    }
+    income.addEventListener("input", function () {
+      var t = total();
+      income.value = t ? t.toLocaleString("en-US") : "";
+      draw();
+    });
+    ids.forEach(function (id) { range(id).addEventListener("input", function () { draw(id); }); });
+    draw();
+  })();
+
+  // The month: tabs, arrow keys between them, and a next link in each step.
+  (function () {
+    var tabs = [].slice.call(document.querySelectorAll(".tab"));
+    if (!tabs.length) return;
+    function show(n, focus) {
+      tabs.forEach(function (t, i) {
+        var on = i === n - 1;
+        t.setAttribute("aria-selected", on ? "true" : "false");
+        t.tabIndex = on ? 0 : -1;
+        document.getElementById("step-" + (i + 1)).classList.toggle("on", on);
+        if (on && focus) { t.focus(); t.scrollIntoView({ block: "nearest", inline: "nearest" }); }
+      });
+    }
+    tabs.forEach(function (t, i) {
+      t.addEventListener("click", function () { show(i + 1); });
+      t.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight") { e.preventDefault(); show((i + 1) % tabs.length + 1, true); }
+        if (e.key === "ArrowLeft") { e.preventDefault(); show((i + tabs.length - 1) % tabs.length + 1, true); }
+      });
+    });
+    [].forEach.call(document.querySelectorAll(".next"), function (b) {
+      b.addEventListener("click", function () { show(Number(b.getAttribute("data-next")), true); });
+    });
+  })();
+
+  // Which one are you: the choice rewrites the button and the email.
+  (function () {
+    var btn = document.getElementById("review-btn");
+    if (!btn) return;
+    var label = document.getElementById("review-label");
+    var picks = [].slice.call(document.querySelectorAll(".pick"));
+    var words = { start: ["Ask about a start", "a start"], check: ["Ask about a check up", "a check up"] };
+    function mail(kind) {
+      var what = words[kind][1];
+      var subject = "Budget review: please send me the price for " + what;
+      var body = "Hi Artur,\n\nI am interested in " + what + ". Please send me the price.\n\nArmenian or English: \n";
+      return "mailto:beginyan.arthur@gmail.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+    }
+    picks.forEach(function (p) {
+      p.addEventListener("click", function () {
+        var kind = p.getAttribute("data-kind");
+        picks.forEach(function (q) { q.setAttribute("aria-checked", q === p ? "true" : "false"); });
+        label.textContent = words[kind][0];
+        btn.href = mail(kind);
+      });
+    });
+  })();
 </script>
 </body>
 </html>
