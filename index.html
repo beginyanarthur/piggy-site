@@ -494,34 +494,36 @@
   .closing > p { max-width: 34em; }
   .closing .actions { justify-content: center; }
 
-  /* ---------- The month, one step at a time ---------- */
-  .month { display: flex; flex-direction: column; gap: var(--s-lg); max-width: 920px; }
-  .tabs { display: flex; flex-wrap: wrap; gap: var(--s-sm); }
-  .tab {
-    display: inline-flex; align-items: center; gap: var(--s-sm); cursor: pointer;
-    min-height: 44px; padding: 6px 16px 6px 8px; font: 600 var(--t-body-app) var(--font);
-    color: var(--ink-dim); background: transparent; border: 1px solid var(--line-strong); border-radius: var(--r-pill);
-    transition: color 150ms ease-out, border-color 150ms ease-out, background-color 150ms ease-out;
+  /* ---------- The month, one step at a time ----------
+     The steps run down the left and the phone stands on the right. The
+     chosen step opens in place, so its sentence sits under its own title
+     and not in a separate block across the page. */
+  .month { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: var(--s-xxl); align-items: center; max-width: 920px; }
+  .steps { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
+  .step { border-top: 1px solid var(--line); }
+  .step:last-child { border-bottom: 1px solid var(--line); }
+  .step-b {
+    display: flex; align-items: center; gap: var(--s-md); width: 100%; min-height: 60px;
+    padding: var(--s-sm) 0; cursor: pointer; text-align: left;
+    background: none; border: 0; font: 600 var(--t-h3)/1.3 var(--font); color: var(--ink-dim);
+    transition: color 150ms ease-out;
   }
-  .tab:hover { color: var(--ink); border-color: var(--pink); }
-  .tab[aria-selected="true"] { color: var(--ink); background: var(--card); border-color: var(--pink); }
-  .tab[aria-selected="true"] .step-no { background: var(--pink); color: var(--on-pink); border-color: var(--pink); }
-  .panel { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: var(--s-xxl); align-items: center; }
-  :root.js .panel:not(.on) { display: none; }
-  :root:not(.js) .panel + .panel { margin-top: var(--s-xl); }
-  .panel .shot { width: 100%; height: auto; }
-  .panel .said { display: flex; flex-direction: column; gap: var(--s-sm); align-items: flex-start; }
-  .panel .said h3 { margin: 0; font-size: var(--t-h1); font-weight: 700; line-height: 1.2; color: var(--ink); }
-  .panel .said p { color: var(--ink-dim); max-width: 32em; }
-  .next { margin-top: var(--s-xs); min-height: 44px; padding: 0; border: 0; background: none; color: var(--pink); font: 600 var(--t-body-app) var(--font); cursor: pointer; }
+  .step-b:hover { color: var(--ink); }
+  .step-b .step-no { flex: none; transition: background-color 150ms ease-out, color 150ms ease-out; }
+  .step.on .step-b { color: var(--ink); font-size: var(--t-h2); }
+  .step.on .step-no { background: var(--pink); color: var(--on-pink); border-color: var(--pink); }
+  .step-d { padding: 0 0 var(--s-lg) 44px; display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-sm); }
+  .step-d p { color: var(--ink-dim); max-width: 32em; }
+  :root.js .step:not(.on) .step-d { display: none; }
+  .next { min-height: 44px; padding: 0; border: 0; background: none; color: var(--pink); font: 600 var(--t-body-app) var(--font); cursor: pointer; }
   :root:not(.js) .next { display: none; }
+  .phone-col { position: sticky; top: 90px; }
+  .phone-col .shot { width: 100%; height: auto; display: block; }
+  :root.js .phone-col .shot:not(.on) { display: none; }
+  :root:not(.js) .phone-col .shot + .shot { display: none; }
   @media (max-width: 720px) {
-    .tabs { flex-wrap: nowrap; overflow-x: auto; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scrollbar-width: none; }
-    .tabs::-webkit-scrollbar { display: none; }
-    .tab { flex: none; white-space: nowrap; }
-    .panel { grid-template-columns: 1fr; gap: var(--s-lg); justify-items: center; text-align: center; }
-    .panel .shot { max-width: 220px; }
-    .panel .said { align-items: center; }
+    .month { grid-template-columns: 1fr; gap: var(--s-lg); }
+    .phone-col { position: static; order: -1; justify-self: center; width: 220px; }
   }
 
   /* ---------- Which one are you ---------- */
@@ -597,7 +599,6 @@
 <main class="wrap wide">
 
   <section id="what">
-    <p class="kicker">The idea</p>
     <h2>What Piggy does</h2>
     <ul class="does">
       <li><svg class="ion" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g transform="translate(-3.120 -4.484) scale(1.26)" stroke="currentColor" stroke-width="1.151" stroke-linejoin="round" stroke-linecap="round"><path d="M8.6 11.2 L15.4 11.2 L18.8 17.2 A2.2 2.2 0 0 1 16.8 20.4 L7.2 20.4 A2.2 2.2 0 0 1 5.2 17.2 Z"/><path d="M9.2 10.4 L8.1 6.4 L15.9 6.4 L14.8 10.4"/><path d="M8.4 11.2 L15.6 11.2"/></g></svg><b>Make a bag</b><span>For what you spend on, and for what you put aside for.</span></li>
@@ -610,56 +611,52 @@
   </section>
 
   <section id="how">
-    <p class="kicker">How it goes</p>
     <h2>What does a month look like?</h2>
     <p class="lead-in">Five steps, every month. Tap one to see it.</p>
     <div class="month">
-      <div class="tabs" role="tablist" aria-label="The five steps of a month">
-        <button class="tab" type="button" role="tab" id="tab-1" aria-controls="step-1" aria-selected="true"><span class="step-no">1</span><span>Money in</span></button>
-        <button class="tab" type="button" role="tab" id="tab-2" aria-controls="step-2" aria-selected="false" tabindex="-1"><span class="step-no">2</span><span>Allocate</span></button>
-        <button class="tab" type="button" role="tab" id="tab-3" aria-controls="step-3" aria-selected="false" tabindex="-1"><span class="step-no">3</span><span>Spend</span></button>
-        <button class="tab" type="button" role="tab" id="tab-4" aria-controls="step-4" aria-selected="false" tabindex="-1"><span class="step-no">4</span><span>Check</span></button>
-        <button class="tab" type="button" role="tab" id="tab-5" aria-controls="step-5" aria-selected="false" tabindex="-1"><span class="step-no">5</span><span>Plan</span></button>
-      </div>
-      <div class="panel on" role="tabpanel" id="step-1" aria-labelledby="tab-1">
-        <img class="shot" src="art/income.webp" alt="Add income: 750,000 dram typed in, a field for where it came from, and the date" width="1003" height="2000">
-        <div class="said">
-          <h3>Money comes in</h3>
-          <p>Your salary, a side job, a gift. Add it, and Piggy holds it until you say where it goes.</p>
-          <button class="next" type="button" data-next="2">Next: you give each bag its share ›</button>
-        </div>
-      </div>
-      <div class="panel" role="tabpanel" id="step-2" aria-labelledby="tab-2">
-        <img class="shot" src="art/bag-trip.webp" alt="A trip bag with an airport photo on top: 230,000 dram left to spend of 250,000 allocated, and its history" width="1003" height="2000" loading="lazy">
-        <div class="said">
-          <h3>You give each bag its share</h3>
-          <p>Share what came in between your bags until nothing is left to allocate. If something you need has no bag yet, a trip, a laptop, a rainy day, make one on the way and give it what you can.</p>
-          <button class="next" type="button" data-next="3">Next: you spend from a bag ›</button>
-        </div>
-      </div>
-      <div class="panel" role="tabpanel" id="step-3" aria-labelledby="tab-3">
-        <img class="shot" src="art/spend.webp" alt="The log a spend sheet: bags grouped into essentials, everyday, saving for and owing, each showing what is left in it" width="1073" height="2000" loading="lazy">
-        <div class="said">
-          <h3>You spend from a bag</h3>
-          <p>Tap the button, pick the bag, type the amount. Each bag shows what is left while you choose, so you know before you spend and not after.</p>
-          <button class="next" type="button" data-next="4">Next: you check the real money ›</button>
-        </div>
-      </div>
-      <div class="panel" role="tabpanel" id="step-4" aria-labelledby="tab-4">
-        <img class="shot" src="art/check.webp" alt="The money check: what your bags hold, with a button to count what you really have" width="1003" height="2000" loading="lazy">
-        <div class="said">
-          <h3>You check the real money</h3>
-          <p>Does Piggy match the money you really have? Count your cash and cards to find out. If the two do not agree, Piggy helps you fix the difference.</p>
-          <button class="next" type="button" data-next="5">Next: you plan the next month ›</button>
-        </div>
-      </div>
-      <div class="panel" role="tabpanel" id="step-5" aria-labelledby="tab-5">
-        <img class="shot" src="art/plan.webp" alt="Start planning October: copy September's bags and amounts, or start from scratch" width="1003" height="2000" loading="lazy">
-        <div class="said">
-          <h3>You plan the next month</h3>
-          <p>Most months look like the one before. Copy the last one or start from scratch, then change what needs changing. More here, less there, and it starts again.</p>
-          <button class="next" type="button" data-next="1">Back to the start ›</button>
-        </div>
+      <ol class="steps">
+        <li class="step on">
+          <button class="step-b" type="button" id="st-1" aria-expanded="true" aria-controls="sd-1"><span class="step-no">1</span><span class="step-t">Money comes in</span></button>
+          <div class="step-d" id="sd-1">
+            <p>Your salary, a side job, a gift. Add it, and Piggy holds it until you say where it goes.</p>
+            <button class="next" type="button" data-next="2">Next ›</button>
+          </div>
+        </li>
+        <li class="step">
+          <button class="step-b" type="button" id="st-2" aria-expanded="false" aria-controls="sd-2"><span class="step-no">2</span><span class="step-t">You give each bag its share</span></button>
+          <div class="step-d" id="sd-2">
+            <p>Share what came in between your bags until nothing is left to allocate. If something you need has no bag yet, a trip, a laptop, a rainy day, make one on the way and give it what you can.</p>
+            <button class="next" type="button" data-next="3">Next ›</button>
+          </div>
+        </li>
+        <li class="step">
+          <button class="step-b" type="button" id="st-3" aria-expanded="false" aria-controls="sd-3"><span class="step-no">3</span><span class="step-t">You spend from a bag</span></button>
+          <div class="step-d" id="sd-3">
+            <p>Tap the button, pick the bag, type the amount. Each bag shows what is left while you choose, so you know before you spend and not after.</p>
+            <button class="next" type="button" data-next="4">Next ›</button>
+          </div>
+        </li>
+        <li class="step">
+          <button class="step-b" type="button" id="st-4" aria-expanded="false" aria-controls="sd-4"><span class="step-no">4</span><span class="step-t">You check the real money</span></button>
+          <div class="step-d" id="sd-4">
+            <p>Does Piggy match the money you really have? Count your cash and cards to find out. If the two do not agree, Piggy helps you fix the difference.</p>
+            <button class="next" type="button" data-next="5">Next ›</button>
+          </div>
+        </li>
+        <li class="step">
+          <button class="step-b" type="button" id="st-5" aria-expanded="false" aria-controls="sd-5"><span class="step-no">5</span><span class="step-t">You plan the next month</span></button>
+          <div class="step-d" id="sd-5">
+            <p>Most months look like the one before. Copy the last one or start from scratch, then change what needs changing. More here, less there, and it starts again.</p>
+            <button class="next" type="button" data-next="1">Back to the start ›</button>
+          </div>
+        </li>
+      </ol>
+      <div class="phone-col" aria-live="polite">
+        <img class="shot on" data-step="1" src="art/income.webp" alt="Add income: 750,000 dram typed in, a field for where it came from, and the date" width="1003" height="2000">
+        <img class="shot" data-step="2" src="art/bag-trip.webp" alt="A trip bag with an airport photo on top: 230,000 dram left to spend of 250,000 allocated, and its history" width="1003" height="2000" loading="lazy">
+        <img class="shot" data-step="3" src="art/spend.webp" alt="The log a spend sheet: bags grouped into essentials, everyday, saving for and owing, each showing what is left in it" width="1073" height="2000" loading="lazy">
+        <img class="shot" data-step="4" src="art/check.webp" alt="The money check: what your bags hold, with a button to count what you really have" width="1003" height="2000" loading="lazy">
+        <img class="shot" data-step="5" src="art/plan.webp" alt="Start planning October: copy September's bags and amounts, or start from scratch" width="1003" height="2000" loading="lazy">
       </div>
     </div>
   </section>
@@ -788,27 +785,30 @@
 })();
 </script>
 <script>
-  // The month: tabs, arrow keys between them, and a next link in each step.
+  // The month: one step open at a time, its screen on the phone beside it.
   (function () {
-    var tabs = [].slice.call(document.querySelectorAll(".tab"));
-    if (!tabs.length) return;
+    var steps = [].slice.call(document.querySelectorAll(".step"));
+    if (!steps.length) return;
+    var shots = [].slice.call(document.querySelectorAll(".phone-col .shot"));
     function show(n, focus) {
-      tabs.forEach(function (t, i) {
+      steps.forEach(function (st, i) {
         var on = i === n - 1;
-        t.setAttribute("aria-selected", on ? "true" : "false");
-        t.tabIndex = on ? 0 : -1;
-        document.getElementById("step-" + (i + 1)).classList.toggle("on", on);
-        if (on && focus) { t.focus(); t.scrollIntoView({ block: "nearest", inline: "nearest" }); }
+        st.classList.toggle("on", on);
+        var b = st.querySelector(".step-b");
+        b.setAttribute("aria-expanded", on ? "true" : "false");
+        if (on && focus) b.focus({ preventScroll: true });
       });
+      shots.forEach(function (im) { im.classList.toggle("on", im.getAttribute("data-step") === String(n)); });
     }
-    tabs.forEach(function (t, i) {
-      t.addEventListener("click", function () { show(i + 1); });
-      t.addEventListener("keydown", function (e) {
-        if (e.key === "ArrowRight") { e.preventDefault(); show((i + 1) % tabs.length + 1, true); }
-        if (e.key === "ArrowLeft") { e.preventDefault(); show((i + tabs.length - 1) % tabs.length + 1, true); }
+    steps.forEach(function (st, i) {
+      var b = st.querySelector(".step-b");
+      b.addEventListener("click", function () { show(i + 1); });
+      b.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowDown") { e.preventDefault(); show((i + 1) % steps.length + 1, true); }
+        if (e.key === "ArrowUp") { e.preventDefault(); show((i + steps.length - 1) % steps.length + 1, true); }
       });
     });
-    [].forEach.call(document.querySelectorAll(".next"), function (b) {
+    [].forEach.call(document.querySelectorAll(".step .next"), function (b) {
       b.addEventListener("click", function () { show(Number(b.getAttribute("data-next")), true); });
     });
   })();
