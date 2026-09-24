@@ -56,6 +56,7 @@
     --pink-strong: #A82278; /* pigPinkDark, a solid button pressed or hovered */
     --on-pink: #FFFFFF;     /* textInverse, words on a pink fill */
     --income-soft: #0C74401A; /* incomeSoft, the wash behind "All allocated" */
+    --overlay: #1B1E3859;   /* overlay, the app's scrim; here the shadow under a card you can click */
 
     /* The app's face, which is the system's: SF Pro on Apple, and whatever
        the platform's own UI face is everywhere else. One typography across
@@ -78,7 +79,7 @@
       --card: #3A4066;
       --line: #FFFFFF24; --line-strong: #FFFFFF73;
       --ink: #FFFFFF; --ink-dim: #FFFFFFCC; --ink-muted: #FFFFFFA6;
-      --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-strong: #D6389C; --on-pink: #1B1E38; --income-soft: #3FDE851F;
+      --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-strong: #D6389C; --on-pink: #1B1E38; --income-soft: #3FDE851F; --overlay: #0E1024BF;
     }
   }
   :root[data-theme="dark"] {
@@ -86,7 +87,7 @@
     --card: #3A4066;
     --line: #FFFFFF24; --line-strong: #FFFFFF73;
     --ink: #FFFFFF; --ink-dim: #FFFFFFCC; --ink-muted: #FFFFFFA6;
-    --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-strong: #D6389C; --on-pink: #1B1E38; --income-soft: #3FDE851F;
+    --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-strong: #D6389C; --on-pink: #1B1E38; --income-soft: #3FDE851F; --overlay: #0E1024BF;
   }
 
   * { box-sizing: border-box; }
@@ -558,7 +559,16 @@
   .pick > span { display: flex; flex-direction: column; gap: var(--s-xs); }
   .pick b { font-size: var(--t-h3); font-weight: 600; color: var(--ink); }
   .pick .ion { width: 40px; height: 40px; padding: 9px; border-radius: var(--r-md); background: var(--pink-soft); color: var(--pink); }
-  .pick:hover { border-color: var(--pink); }
+  /* Clickable, so it floats: the soft resting shadow the Learn cards wear,
+     a lift on hover, and pressed flat again. Cards that only inform, like
+     What Piggy does, stay flat on the page. */
+  .pick {
+    box-shadow: 0 10px 24px -16px var(--overlay), 0 1px 3px -1px var(--overlay);
+    transition: border-color 150ms ease-out, background-color 150ms ease-out, transform 150ms ease-out, box-shadow 150ms ease-out;
+  }
+  .pick:hover { border-color: var(--pink); transform: translateY(-3px); box-shadow: 0 18px 36px -18px var(--overlay), 0 2px 6px -3px var(--overlay); }
+  .pick:active { transform: translateY(0); box-shadow: 0 1px 3px -1px var(--overlay); }
+  @media (prefers-reduced-motion: reduce) { .pick:hover { transform: none; } }
   /* Chosen: a 2px pink edge on the pink wash, the padding one less so nothing shifts. */
   .pick[aria-checked="true"] { border: 2px solid var(--pink); padding: calc(var(--s-md) - 1px); background: var(--pink-soft); }
 </style>
