@@ -4,134 +4,587 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Piggy: money in bags, month by month</title>
-<meta name="description" content="Piggy is a budgeting app built around bags. Every bit of money you have goes into a bag, so you always know what is left for what. Your budget stays on your phone.">
+<meta name="description" content="Piggy is an iPhone budgeting app built around bags. Every dram goes in a bag, so you always know what is left for what. Your budget stays on your phone.">
 <meta name="color-scheme" content="light dark">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400&display=swap">
-</head>
-<body>
+<link rel="icon" href="art/icon.png">
+<script>
+  /* The reader's saved theme, set before the first paint so a page they
+     chose dark does not flash light on the way in. */
+  try { var t = localStorage.getItem("piggy-theme"); if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+</script>
+<meta property="og:title" content="Budgeting is not only about counting money">
+<meta property="og:description" content="Piggy puts every dram in a bag. Rent, food, fun, a trip, savings. You always know what is left for what.">
+<meta property="og:image" content="https://beginyanarthur.github.io/piggy-site/art/bags.png">
+<meta property="og:url" content="https://beginyanarthur.github.io/piggy-site/">
+<meta property="og:type" content="website">
 <style>
+  /*
+    The tokens below are the app's own, lifted from src/theme/index.ts, so the
+    page and the product are measured with one ruler.
+
+      spacing  4 · 8 · 16 · 24 · 32 · 48        (spacing)
+      radius   8 · 16 · 22 · 28 · 999           (radius)
+      type     11 · 13 · 15 · 18 · 22 · 28 · 34 · 42, each step about a fifth
+               larger than the one below       (typography)
+
+    Two deliberate differences, both because a page is read once and an app is
+    used daily. The colours are paper rather than indigo, so the screenshots
+    carry the product's colour and the page around them stays quiet. And body
+    text steps up one rung, from the app's 15 to 17, because a screen held at
+    arm's length is not a screen held in the hand.
+  */
   :root {
-    --paper: #FBFAF7;
-    --card: #FFFFFF;
-    --line: #DFDDD6;
-    --ink: #1B1A24;
-    --ink-dim: #55535F;
-    --pink: #B82A8E;
-    --teal: #0C7C6C;
+    /*
+      The app's palette, key for key, from src/theme/colors.ts. Decided
+      23 September 2026: the page had its own paper colours, and a site that
+      is a different colour from the product it sells is a site working
+      against itself. The screenshots now sit on their own ground instead of
+      being pasted onto someone else's.
+    */
+    --bg-top: #EBEEF7;      /* bgTop */
+    --bg-bottom: #DFE3F1;   /* bgBottom */
+    --card: #FFFFFF;        /* surface */
+    --line: #1B1E3824;      /* border, a divider */
+    --line-strong: #1B1E3880; /* borderStrong, the edge of a control */
+    --ink: #1B1E38;         /* textPrimary */
+    --ink-dim: #1B1E38D1;   /* textSecondary */
+    --ink-muted: #1B1E38A8; /* textMuted */
+    --pink: #D42D97;        /* pigPink */
+    --income: #0A6A3B;      /* income */
+    --pink-soft: #D42D971A; /* pigPink at a fill's weight, as incomeSoft is */
+
+    /* The app's face, which is the system's: SF Pro on Apple, and whatever
+       the platform's own UI face is everywhere else. One typography across
+       the app and the site was the point. */
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
+
+    /* spacing, verbatim */
+    --s-xs: 4px; --s-sm: 8px; --s-md: 16px; --s-lg: 24px; --s-xl: 32px; --s-xxl: 48px;
+    /* radius, verbatim */
+    --r-sm: 8px; --r-md: 16px; --r-lg: 22px; --r-xl: 28px; --r-pill: 999px;
+    /* typography, the rungs the page uses */
+    --t-micro: 11px; --t-caption: 13px; --t-body-app: 15px; --t-h3: 18px;
+    --t-h2: 22px; --t-h1: 28px; --t-amount: 34px; --t-display: 42px;
+
+    --gutter: var(--s-lg);
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --paper: #15161F;
-      --card: #1E1F2B;
-      --line: #32333F;
-      --ink: #EDECF2;
-      --ink-dim: #A7A5B4;
-      --pink: #F07FCB;
-      --teal: #3ACBB2;
+      --bg-top: #2E3358; --bg-bottom: #1B1E38;
+      --card: #3A4066;
+      --line: #FFFFFF24; --line-strong: #FFFFFF73;
+      --ink: #FFFFFF; --ink-dim: #FFFFFFCC; --ink-muted: #FFFFFFA6;
+      --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024;
     }
   }
   :root[data-theme="dark"] {
-    --paper: #15161F;
-    --card: #1E1F2B;
-    --line: #32333F;
-    --ink: #EDECF2;
-    --ink-dim: #A7A5B4;
-    --pink: #F07FCB;
-    --teal: #3ACBB2;
+    --bg-top: #2E3358; --bg-bottom: #1B1E38;
+    --card: #3A4066;
+    --line: #FFFFFF24; --line-strong: #FFFFFF73;
+    --ink: #FFFFFF; --ink-dim: #FFFFFFCC; --ink-muted: #FFFFFFA6;
+    --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024;
   }
 
   * { box-sizing: border-box; }
+  /* Money lines up in the app and it lines up here. */
+  .num { font-variant-numeric: tabular-nums; }
+  html { -webkit-text-size-adjust: 100%; }
   body {
     margin: 0;
-    background: var(--paper);
+    /*
+      One screen of the app's gradient, held still while the page scrolls, so
+      every scroll position shows what a screen of Piggy shows: top to bottom,
+      bgTop to bgBottom. A gradient stretched over the whole document would be
+      a wash nobody could see.
+    */
+    background: linear-gradient(var(--bg-top), var(--bg-bottom)) fixed;
+    background-color: var(--bg-bottom);
     color: var(--ink);
-    font-family: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font);
     font-size: 17px;
-    line-height: 1.62;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 680px; margin: 0 auto; padding-inline: 20px; padding-block: 52px 80px; }
+  .wrap { max-width: 720px; margin: 0 auto; padding-inline: var(--gutter); }
+  .wrap.wide { max-width: 1060px; }
 
-  h1, h2 { font-family: "Newsreader", Georgia, serif; font-weight: 600; margin: 0; text-wrap: balance; }
-  h1 { font-size: clamp(34px, 7.4vw, 50px); line-height: 1.04; letter-spacing: -0.015em; }
-  h2 { font-size: clamp(20px, 3.5vw, 24px); line-height: 1.2; }
+  /* The bar that says which site this is, on every page of it. */
+  .site {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bg-top);
+    border-bottom: 1px solid var(--line);
+  }
+  .site .wrap { display: flex; align-items: center; gap: var(--s-md); padding-block: 10px; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); margin-right: auto; }
+  .brand img { width: 28px; height: 28px; border-radius: var(--s-sm); display: block; }
+  .brand b { font-size: var(--t-h3); font-weight: 700; letter-spacing: 0.2px; }
+  .nav { display: flex; gap: var(--s-sm); }
+  /* The padding is the tap target: 15px of text is a 20px line, and a thumb
+     needs 44. It reads as spacing and works as a button. */
+  .nav a {
+    color: var(--ink-dim); text-decoration: none; font-size: var(--t-body-app);
+    padding: 12px var(--s-sm); border-radius: var(--r-sm); white-space: nowrap;
+    transition: color 150ms ease-out;
+  }
+  .nav a:hover { color: var(--ink); }
+  /* On a phone the bar is brand, three links and the switch in 327px, so the
+     air between them comes down to the app's `sm` and the switch keeps its
+     full 36: squeezed, it went oval and ran past the gutter. */
+  @media (max-width: 420px) {
+    .site .wrap { gap: var(--s-sm); }
+    .nav { gap: 0; } .nav a { font-size: 14px; padding-inline: var(--s-xs); }
+    .theme { margin-left: 0; }
+  }
+  /*
+    Light or dark, the reader's choice, the way the app lets them choose.
+
+    It follows the system until they press it, and after that their choice is
+    remembered on this browser. The moon shows while the page is light,
+    because a button says where it takes you.
+  */
+  .theme {
+    flex: none; margin-left: var(--s-md); display: grid; place-items: center;
+    width: 36px; height: 36px; padding: 0;
+    border: 1px solid var(--line-strong); border-radius: var(--r-pill);
+    background: var(--card); color: var(--ink-dim); cursor: pointer;
+    transition: color 150ms ease-out, border-color 150ms ease-out;
+  }
+  .theme:hover { color: var(--ink); border-color: var(--pink); }
+  .theme .i-light { display: none; }
+  .theme .i-dark { display: block; }
+  :root[data-theme="dark"] .theme .i-light { display: block; }
+  :root[data-theme="dark"] .theme .i-dark { display: none; }
+  /* Dark because the system is, before anyone has pressed it. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .theme .i-light { display: block; }
+    :root:not([data-theme]) .theme .i-dark { display: none; }
+  }
+
+  /* The app's scale: display 42 and h1 28, both at 700, h2 at 22. The web
+     gets the top of that scale for the hero and the h1 size for sections. */
+  h1, h2 { font-family: var(--font); margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(var(--t-h1), 5.4vw, var(--t-display)); line-height: 1.12; font-weight: 700; letter-spacing: -0.01em; }
+  h2 { font-size: clamp(var(--t-h2), 3.6vw, var(--t-h1)); line-height: 1.2; font-weight: 700; letter-spacing: 0.2px; }
   p { margin: 0; }
-  a { color: var(--teal); }
+  /* Pink is what the app makes tappable: "Add a bag", "Plan October". There
+     is no teal in Piggy, so there is none here. */
+  a { color: var(--pink); }
 
-  header { display: flex; flex-direction: column; gap: 14px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
-  .stamp {
-    font-family: "JetBrains Mono", ui-monospace, monospace;
-    font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-dim);
+  /*
+    The hero, in two columns: what Piggy claims on the left, Piggy itself on
+    the right. The claim is a sentence, and a sentence wants a left edge to
+    start from. Centred, every line began somewhere different and the eye had
+    to find the start of each one.
+  */
+  .hero { padding-block: var(--s-xxl) var(--s-md); }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
+    gap: var(--s-xxl);
+    align-items: center;
   }
-  .summary {
-    font-family: "Newsreader", Georgia, serif;
-    font-size: clamp(19px, 3.4vw, 22px);
-    line-height: 1.45;
+  .hero-text { display: flex; flex-direction: column; gap: var(--s-md); }
+
+  /* One step above body, the way the app opens a screen with a sentence. */
+  /* Balanced, so the two sentences do not break with a stray word starting
+     the second line. */
+  .lede { font-size: clamp(var(--t-h3), 2.4vw, var(--t-h2)); line-height: 1.45; color: var(--ink); max-width: 20em; text-wrap: balance; }
+  .lede b { color: var(--pink); font-weight: 600; }
+  .hero-text .how { color: var(--ink-dim); max-width: 30em; }
+
+  @media (max-width: 880px) {
+    .hero { padding-block: var(--s-xl) var(--s-sm); }
+    .hero-grid { grid-template-columns: 1fr; gap: var(--s-xl); justify-items: center; text-align: center; }
+    .hero-text { align-items: center; }
+    .lede, .hero-text .how { max-width: 34em; }
+    .actions { justify-content: center; }
   }
-  .summary b { color: var(--pink); font-weight: 600; }
 
-  section { display: flex; flex-direction: column; gap: 12px; margin-top: 38px; }
-  section p, section li { color: var(--ink-dim); }
-  section p strong, section li strong { color: var(--ink); font-weight: 600; }
-  ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+  /*
+    Three phones, the middle one forward.
 
-  .links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+    A single screenshot says "an app"; three say "a system you live in", which
+    is the claim the headline makes. The two behind are smaller, turned a
+    degree or two and dimmed, so the eye lands on the middle one and the group
+    reads as depth rather than as a row of pictures.
+  */
+  .screens {
+    position: relative; width: 100%; max-width: 520px;
+    display: flex; align-items: flex-end; justify-content: center; gap: 0;
+  }
+  .screens img {
+    width: 44%; height: auto; display: block;
+    /* Each screenshot comes in its own phone, drawn round a transparent
+       ground, so the page adds no corner, edge or fill of its own: a second
+       frame round the first read as a phone in a picture frame. */
+  }
+  .screens .side { width: 36%; opacity: .72; }
+  .screens .left { transform: rotate(-4deg) translateX(14%) translateY(-2%); }
+  .screens .right { transform: rotate(4deg) translateX(-14%) translateY(-2%); }
+  .screens .front { position: relative; z-index: 2; }
+  /* The glass in the app's own pink, behind the group: the one place on the
+     page where the app's colour is allowed to leak out of a screenshot. */
+  .screens::before {
+    content: ""; position: absolute; z-index: 0;
+    left: 12%; right: 12%; top: 14%; bottom: 8%;
+    /* No blur filter: a large blurred layer costs a compositor pass on every
+       scroll, and a soft gradient reads the same. */
+    background: radial-gradient(55% 50% at 50% 45%, rgba(244,95,192,.16), rgba(91,141,239,.10) 58%, transparent 74%);
+  }
+  @media (max-width: 520px) {
+    .screens .side { display: none; }
+    .screens img { width: 62%; }
+  }
+
+  /*
+    The two actions, each with the mark of the place it leads to. A word alone
+    made the reader parse the sentence before knowing where the button went;
+    the mark is read before the word is.
+  */
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: var(--s-xs); }
+  .actions svg { flex: none; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 12px;
+    border: 1px solid var(--line-strong); border-radius: var(--r-pill); background: var(--card);
+    padding: 11px 20px; color: var(--ink); font-weight: 600; font-size: 16px; text-decoration: none;
+  }
+  .badge small { display: block; font-weight: 400; font-size: 12.5px; color: var(--ink-dim); letter-spacing: .02em; }
+  /* On a phone the badge is the widest thing in the hero, and side by side
+     the two lines broke mid phrase. Stacked and centred, it stays one shape. */
+  @media (max-width: 430px) {
+    .actions { width: 100%; }
+    .badge, .link { width: 100%; justify-content: center; text-align: center; }
+  }
   .link {
-    border: 1px solid var(--line); border-radius: 999px; background: var(--card);
-    padding: 9px 16px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 15.5px;
+    display: inline-flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: var(--s-xs) var(--s-sm);
+    border: 1px solid var(--line-strong); border-radius: var(--r-pill); background: transparent;
+    padding: 10px 18px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: var(--t-body-app);
+    transition: border-color 150ms ease-out;
   }
+  .link:hover { border-color: var(--pink); }
+  /* Each part stays whole: on a phone the pill was breaking "Follow on
+     Telegram" across two lines while its note sat alone on the right. */
+  .link em, .link span { white-space: nowrap; }
+  .link em { font-style: normal; }
   .link span { color: var(--ink-dim); font-weight: 400; }
+  .tg { color: #2AABEE; }
 
-  .facts { border: 1px solid var(--line); border-radius: 12px; background: var(--card); overflow: hidden; }
-  .fact { display: grid; grid-template-columns: 200px 1fr; gap: 16px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+  /*
+    One left edge down the whole page. The hero sits in the wide column, so
+    the sections do too, and the text inside them is held to a readable
+    measure instead of being centred in a narrower box. Centred, the page had
+    two different left margins and read as two pages stapled together.
+  */
+  /*
+    Sections are told apart by air and by a label, not by a rule.
+
+    The hairline was the app's `border` token, which is a divider between rows
+    of a table and is far too quiet to carry a whole section on a page this
+    long: it read as a smudge across the middle of the ground. The app itself
+    never draws one. It groups with space and a small uppercase heading, so
+    the page does the same, and the eyebrow gives a scanning reader a rung to
+    land on before the sentence starts.
+  */
+  section { padding-block: var(--s-xxl); display: flex; flex-direction: column; gap: var(--s-md); }
+  section > h2 { margin-top: calc(var(--s-sm) * -1); }
+  /* The app's `label`: 13 at 600, uppercase, 0.6 of tracking. */
+  .kicker {
+    font-size: var(--t-caption); font-weight: 600; letter-spacing: 0.6px;
+    text-transform: uppercase; color: var(--ink-muted);
+  }
+  section > h2, section > p, .facts, .actions { max-width: 760px; }
+  /* The one sentence that sets a section up reads a step above the body, the
+     way a screen in the app opens with a line before it shows you anything. */
+  .lead-in { font-size: var(--t-h3); }
+
+  /* The page's last word, held together so it reads as one offer. */
+  .closing { padding-bottom: var(--s-xxl); }
+  /* Three pills want the room to sit on one line; the measure cap is for
+     prose, not for controls. */
+  .closing .actions { margin-top: var(--s-sm); max-width: none; }
+  section > p, li { color: var(--ink-dim); }
+  strong { color: var(--ink); font-weight: 600; }
+
+  /*
+    Six cards across, not six lines down.
+
+    As a list they were a column of sentences in a page already made of
+    columns of sentences, and nothing in them looked like a thing you could
+    have. As cards they are six objects, read in any order, and the grid
+    gives the section a shape the eye takes in before it reads a word.
+
+    Six, and every one the same size. It was five, with the first card
+    spanning two columns to fill the row, which made one of them look like the
+    headline and left a lot of empty card around a single line of text. They
+    matter equally, so they are drawn equally, and the sixth is not filler:
+    grouping bags into essentials, everyday, saving for and owing is a real
+    part of the idea and had no place on the page before.
+  */
+  .does {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s-md); margin: 0; padding: 0; list-style: none;
+  }
+  .does li {
+    display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-sm);
+    padding: var(--s-md) var(--s-md) var(--s-lg);
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md);
+  }
+  .does b { font-size: var(--t-h3); font-weight: 600; color: var(--ink); }
+  .does span { font-size: var(--t-body-app); color: var(--ink-dim); }
+  /* On a tile, the way a bag wears its icon in the app's own rows. */
+  .does .ion {
+    width: 40px; height: 40px; padding: 9px; box-sizing: border-box;
+    border: 0; border-radius: var(--r-md);
+    background: var(--pink-soft); color: var(--pink);
+    margin-bottom: var(--s-xs);
+  }
+  @media (max-width: 900px) {
+    .does { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  @media (max-width: 560px) {
+    .does { grid-template-columns: 1fr; }
+  }
+
+
+  /*
+    How it works: one step, one screen, told in the order a month happens.
+
+    Alternating sides rather than a row of three, because the reader is being
+    walked through a sequence, not shown a gallery. Each screen is the real
+    one, at the size a phone is actually held.
+  */
+  /* Held in from the full width: at 1060 the line beside a 240 phone ran
+     short of the column and left a silent third of the row empty. */
+  .walk { display: flex; flex-direction: column; gap: var(--s-xxl); max-width: 920px; }
+  .row { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: var(--s-xxl); align-items: center; }
+  .row:nth-child(even) { grid-template-columns: minmax(0, 1fr) 220px; }
+  .row:nth-child(even) .shot { order: 2; }
+  /* The phone is in the picture, as it is in the hero. */
+  .shot { width: 100%; height: auto; display: block; }
+  .row .said { display: flex; flex-direction: column; gap: var(--s-sm); }
+  /* The number sits with the heading rather than above it: stacked, each step
+     cost three lines of height before a word of it was read, five times over. */
+  .row .said h3 { display: flex; align-items: center; gap: 12px; }
+  .row .said h3 { margin: 0; font-size: var(--t-h2); font-weight: 700; color: var(--ink); line-height: 1.25; }
+  .row .said p { color: var(--ink-dim); }
+  .step-no {
+    flex: none;
+    font-size: var(--t-caption); font-weight: 600; color: var(--pink);
+    border: 1px solid var(--line-strong); border-radius: var(--r-pill);
+    width: 28px; height: 28px; display: grid; place-items: center;
+  }
+  @media (max-width: 720px) {
+    .walk { gap: var(--s-xl); }
+    .row, .row:nth-child(even) { grid-template-columns: 1fr; gap: var(--s-lg); justify-items: center; text-align: center; }
+    .row:nth-child(even) .shot { order: 0; }
+    .shot { max-width: 200px; }
+    .row .said { align-items: center; }
+  }
+
+  /* The promises about the data, as short lines rather than a paragraph to
+     wade through. Each one is a thing that is true, not a slogan. */
+  .safe { display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 0; list-style: none; }
+  .safe li { display: grid; grid-template-columns: 20px 1fr; gap: 12px; align-items: start; }
+  .safe svg { margin-top: 4px; color: var(--income); }
+
+  /* One column, since the glass illustration came out: the promises are the
+     section, and a picture beside them only halved the line length. */
+  .privacy > div { display: flex; flex-direction: column; gap: var(--s-md); max-width: 760px; }
+
+  .facts { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--card); overflow: hidden; }
+  .fact { display: grid; grid-template-columns: 170px 1fr; gap: var(--s-md); padding: 14px 18px; border-bottom: 1px solid var(--line); margin: 0; }
   .fact:last-child { border-bottom: 0; }
   .fact dt { font-weight: 600; color: var(--ink); }
   .fact dd { margin: 0; color: var(--ink-dim); }
-  @media (max-width: 560px) { .fact { grid-template-columns: 1fr; gap: 4px; } }
+  @media (max-width: 560px) { .fact { grid-template-columns: 1fr; gap: var(--s-xs); } }
 
-  footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--ink-dim); font-size: 14.5px; display: flex; flex-direction: column; gap: 6px; }
+  footer { padding-block: var(--s-lg) 72px; color: var(--ink-dim); font-size: 14.5px; display: flex; flex-direction: column; gap: 6px; }
+
+  /*
+    Interaction, such as there is of it.
+
+    A sticky header eats the heading a jump link lands on, so every target
+    keeps its own clearance. The scroll itself is smooth, because a jump from
+    the top of a long page to its middle is disorienting without it, and it
+    stops being smooth the moment the reader has asked for less motion.
+  */
+  html { scroll-behavior: smooth; }
+  :target, section[id] { scroll-margin-top: 76px; }
+
+  /* A keyboard lands here first, and it stays out of sight until it does. */
+  .skip {
+    position: absolute; left: var(--gutter); top: -60px; z-index: 20;
+    background: var(--card); color: var(--ink); text-decoration: none;
+    border: 1px solid var(--line-strong); border-radius: var(--r-pill);
+    padding: 10px 18px; font-weight: 600; font-size: var(--t-body-app);
+    transition: top 150ms ease-out;
+  }
+  .skip:focus { top: 10px; }
+
+  :focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; border-radius: var(--r-sm); }
+  /* Pressed, not hovered: on a phone there is no hover, and every one of
+     these is something a thumb lands on. */
+  .link:active, .theme:active { transform: translateY(1px); }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { transition: none !important; }
+  }
 </style>
+</head>
+<body>
 
-<main class="wrap">
-  <header>
-    <p class="stamp">Piggy · iPhone · Beta</p>
-    <h1>Money in bags, month by month</h1>
-    <p class="summary">Every bit of money you have goes into a <b>bag</b>: rent, food, fun, a trip, savings. When money comes in you split it between your bags. When you spend, you take it from the bag it belongs to.</p>
-  </header>
+<a class="skip" href="#how">Skip to what Piggy does</a>
 
-  <section>
-    <h2>What it does</h2>
-    <ul>
-      <li><strong>Give every dram a place.</strong> Make a bag for anything you spend on or put aside for, and split new income between them in one screen.</li>
-      <li><strong>Log a spend in seconds.</strong> The round button on any screen: pick a bag, type the amount.</li>
-      <li><strong>Plan ahead.</strong> Decide next month before it arrives, and fund it as your income comes in.</li>
-      <li><strong>Check your money.</strong> Count the cash and cards you really have, and see whether Piggy agrees.</li>
-      <li><strong>Know what you owe.</strong> Start a bag with a debt on it and watch it climb back to zero.</li>
+<div class="site">
+  <div class="wrap wide">
+    <a class="brand" href="./"><img src="art/icon.png" alt=""><b>Piggy</b></a>
+    <nav class="nav">
+      <a href="learn.html">Learn</a>
+      <a href="https://beginyanarthur.github.io/piggy-privacy/">Privacy</a>
+      <a href="https://beginyanarthur.github.io/piggy-privacy/support.html">Support</a>
+    </nav>
+    <button class="theme" type="button" id="theme" aria-label="Switch to dark">
+      <svg class="ion i-dark" width="22" height="22" viewBox="0 3 24 24" fill="currentColor" aria-hidden="true"><path d="M7.6875 4.6875Q8.25 4.40625 8.578125 4.59375Q8.8125 4.734375 8.953125 4.96875Q9.046875 5.25 8.8125 5.8125Q8.390625 7.078125 8.296875 8.671875Q8.15625 11.296875 9.234375 13.5Q10.640625 16.359375 13.453125 17.765625Q14.53125 18.28125 15.5625 18.515625Q18.515625 19.171875 21.140625 18.1875Q21.75 17.953125 21.984375 18.046875Q22.21875 18.140625 22.3828125 18.375Q22.546875 18.609375 22.5 18.84375Q22.40625 19.21875 21.890625 20.109375Q20.0625 23.25 16.6875 24.65625Q14.625 25.5 12.375 25.5Q10.359375 25.5 8.53125 24.796875Q6.375 24.0 4.6875 22.3125Q3.328125 20.953125 2.578125 19.3125Q1.5 17.0625 1.5 14.625Q1.5 12.375 2.34375 10.3125Q3.09375 8.484375 4.5234375 6.984375Q5.953125 5.484375 7.6875 4.6875ZM6.890625 7.265625Q6.890625 7.265625 6.890625 7.265625Q6.984375 6.890625 6.9609375 6.8671875Q6.9375 6.84375 6.609375 7.078125Q4.359375 8.8125 3.46875 11.625Q2.765625 13.734375 3.09375 15.9375Q3.5625 19.171875 5.9296875 21.421875Q8.296875 23.671875 11.53125 23.953125Q13.078125 24.09375 14.625 23.71875Q17.296875 23.109375 19.265625 21.140625Q20.25 20.15625 20.15625 20.0625Q20.109375 20.015625 19.734375 20.109375Q18.09375 20.34375 16.546875 20.203125Q13.828125 19.921875 11.53125 18.375Q9.234375 16.828125 7.96875 14.390625Q6.984375 12.515625 6.796875 10.453125Q6.65625 8.90625 6.890625 7.265625Z"/></svg>
+      <svg class="ion i-light" width="22" height="22" viewBox="0 3 24 24" fill="currentColor" aria-hidden="true"><path d="M11.625 4.640625Q11.859375 4.453125 12.1640625 4.5234375Q12.46875 4.59375 12.65625 4.875Q12.75 5.015625 12.75 6.28125Q12.75 7.734375 12.5390625 7.9921875Q12.328125 8.25 12.0 8.25Q11.671875 8.25 11.4609375 7.9921875Q11.25 7.734375 11.25 6.28125Q11.25 5.015625 11.34375 4.875Q11.4375 4.734375 11.625 4.640625ZM4.78125 7.453125Q5.109375 7.265625 5.4375 7.453125Q5.625 7.5 6.4921875 8.390625Q7.359375 9.28125 7.40625 9.46875Q7.546875 9.9375 7.1953125 10.2421875Q6.84375 10.546875 6.375 10.359375Q6.1875 10.265625 5.3203125 9.375Q4.453125 8.484375 4.40625 8.34375Q4.21875 7.734375 4.78125 7.453125ZM18.5625 7.453125Q18.9375 7.265625 19.265625 7.453125Q19.59375 7.640625 19.640625 8.015625Q19.640625 8.25 19.5 8.4609375Q19.359375 8.671875 18.65625 9.375Q17.625 10.453125 17.296875 10.453125Q16.96875 10.453125 16.734375 10.21875Q16.453125 9.84375 16.640625 9.421875Q16.6875 9.234375 17.5546875 8.3671875Q18.421875 7.5 18.5625 7.453125ZM11.296875 10.546875Q11.4375 10.546875 12.1171875 10.546875Q12.796875 10.546875 13.171875 10.640625Q14.484375 11.015625 15.421875 12.046875Q16.21875 12.984375 16.453125 14.296875Q16.59375 15.046875 16.40625 15.796875Q16.171875 17.203125 15.1875 18.1875Q14.203125 19.171875 12.796875 19.40625Q12.046875 19.59375 11.296875 19.453125Q9.609375 19.171875 8.5546875 17.90625Q7.5 16.640625 7.5 15.0Q7.5 13.921875 7.96875 13.03125Q9.0 10.96875 11.296875 10.546875ZM12.84375 12.140625Q12.140625 11.90625 11.484375 12.046875Q10.640625 12.1875 10.0078125 12.75Q9.375 13.3125 9.140625 14.15625Q9.046875 14.4375 9.046875 15.0Q9.046875 15.5625 9.140625 15.84375Q9.609375 17.390625 11.15625 17.90625Q12.0 18.140625 12.84375 17.90625Q14.390625 17.390625 14.859375 15.84375Q14.953125 15.5625 14.953125 15.0Q14.953125 14.4375 14.859375 14.15625Q14.390625 12.5625 12.84375 12.140625ZM2.0625 14.25Q2.203125 14.25 3.421875 14.25Q4.453125 14.25 4.6640625 14.296875Q4.875 14.34375 5.0625 14.484375Q5.578125 15.046875 4.96875 15.5625Q4.734375 15.75 3.28125 15.75Q2.015625 15.75 1.875 15.65625Q1.265625 15.28125 1.59375 14.625Q1.734375 14.34375 2.0625 14.25ZM20.71875 14.25H21.9375L22.125 14.34375Q22.5 14.578125 22.5 15.0Q22.5 15.421875 22.125 15.65625Q21.984375 15.75 20.71875 15.75Q19.265625 15.75 19.03125 15.5625Q18.609375 15.1875 18.796875 14.71875Q18.9375 14.34375 19.265625 14.296875Q19.359375 14.25 19.40625 14.25Q19.453125 14.25 20.71875 14.25ZM6.75 19.59375Q7.125 19.59375 7.3359375 19.921875Q7.546875 20.25 7.359375 20.578125Q7.3125 20.765625 6.4453125 21.6328125Q5.578125 22.5 5.4375 22.546875Q5.0625 22.734375 4.734375 22.546875Q4.40625 22.359375 4.359375 21.984375Q4.359375 21.75 4.5 21.5390625Q4.640625 21.328125 5.34375 20.625Q6.234375 19.734375 6.3984375 19.640625Q6.5625 19.546875 6.75 19.59375ZM17.0625 19.59375Q17.296875 19.5 17.625 19.640625Q17.8125 19.734375 18.6796875 20.625Q19.546875 21.515625 19.59375 21.65625Q19.734375 22.125 19.3828125 22.453125Q19.03125 22.78125 18.5625 22.546875Q18.421875 22.5 17.5546875 21.6328125Q16.6875 20.765625 16.640625 20.578125Q16.5 20.296875 16.6171875 20.015625Q16.734375 19.734375 17.0625 19.59375ZM11.71875 21.796875Q11.71875 21.796875 11.71875 21.796875Q12.0 21.703125 12.28125 21.796875Q12.609375 21.9375 12.703125 22.3125Q12.75 22.453125 12.75 23.71875Q12.75 24.984375 12.65625 25.125Q12.421875 25.5 12.0 25.5Q11.578125 25.5 11.34375 25.125Q11.25 24.984375 11.25 23.6953125Q11.25 22.40625 11.296875 22.265625Q11.4375 21.9375 11.71875 21.796875Z"/></svg>
+    </button>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap wide hero-grid">
+    <div class="hero-text">
+      <h1>Budgeting is not only about counting money</h1>
+      <p class="lede">It is about how you live, and who you want to be. Build the habit, and the rest follows.</p>
+      <p class="how">Piggy puts every dram in a <b>bag</b>. Rent, food, fun, a trip, savings. Money comes in, and you split it between them. You spend, and it comes out of the bag it belongs to.</p>
+      <div class="actions">
+        <span class="badge" aria-label="Coming to the App Store">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6.2" y="2.4" width="11.6" height="19.2" rx="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M10.6 5.5h2.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span>Coming to the App Store<small>iPhone, iOS 16.4 and later</small></span>
+        </span>
+        <a class="link" href="https://t.me/piggy_research">
+          <svg class="tg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>
+          <em>Follow on Telegram</em> <span>to hear when it opens</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="screens">
+      <img class="side left" src="art/bags.webp" alt="The bags list, with rent, food and transport lifted out: each shows what is left and how much of it is spent" width="1074" height="2000">
+      <img class="front" src="art/home.webp" alt="Piggy's home screen: September all allocated, 328,900 dram in 11 bags, two bags over budget" width="1003" height="2000">
+      <img class="side right" src="art/stats.webp" alt="Stats for September: 450,000 dram in, 121,100 spent, and an insight naming the phone instalment as the biggest spend" width="1003" height="2000">
+    </div>
+  </div>
+</header>
+
+<main class="wrap wide">
+
+  <section id="what">
+    <p class="kicker">The idea</p>
+    <h2>What Piggy does</h2>
+    <ul class="does">
+      <li><svg class="ion" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g transform="translate(-3.120 -4.484) scale(1.26)" stroke="currentColor" stroke-width="1.151" stroke-linejoin="round" stroke-linecap="round"><path d="M8.6 11.2 L15.4 11.2 L18.8 17.2 A2.2 2.2 0 0 1 16.8 20.4 L7.2 20.4 A2.2 2.2 0 0 1 5.2 17.2 Z"/><path d="M9.2 10.4 L8.1 6.4 L15.9 6.4 L14.8 10.4"/><path d="M8.4 11.2 L15.6 11.2"/></g></svg><b>Make a bag</b><span>For what you spend on, and for what you put aside for.</span></li>
+      <li><svg class="ion" width="22" height="22" viewBox="0 3 24 24" fill="currentColor" aria-hidden="true"><path d="M6.5625 6.046875Q6.609375 6.0 12.046875 6.0H17.53125L17.671875 6.140625Q17.953125 6.375 18.0 6.65625Q18.046875 7.3125 17.390625 7.453125Q17.203125 7.5 12.0 7.5Q6.796875 7.5 6.609375 7.453125Q6.046875 7.359375 6.0234375 6.796875Q6.0 6.234375 6.5625 6.046875ZM5.0625 8.25Q5.203125 8.25 12.046875 8.25H18.9375L19.125 8.34375Q19.5 8.578125 19.5 9.0Q19.5 9.421875 19.125 9.65625L18.984375 9.75H12.0H5.015625L4.875 9.65625Q4.265625 9.28125 4.59375 8.625Q4.734375 8.34375 5.0625 8.25ZM3.75 10.59375Q3.984375 10.546875 11.9765625 10.5234375Q19.96875 10.5 20.203125 10.59375Q20.765625 10.734375 21.1875 11.203125Q21.609375 11.671875 21.703125 12.234375Q21.75 12.46875 21.75 17.25Q21.75 21.1875 21.7265625 21.84375Q21.703125 22.5 21.515625 22.828125Q21.234375 23.484375 20.578125 23.8125Q20.296875 23.90625 20.109375 23.953125Q19.875 24.0 12.0 24.0Q4.125 24.0 3.890625 23.953125Q3.703125 23.90625 3.421875 23.8125Q2.765625 23.484375 2.484375 22.828125Q2.296875 22.5 2.2734375 21.84375Q2.25 21.1875 2.25 17.25Q2.25 12.46875 2.296875 12.234375Q2.390625 11.671875 2.8125 11.203125Q3.234375 10.734375 3.75 10.59375ZM19.921875 12.09375Q19.921875 12.09375 19.921875 12.09375Q19.78125 12.0 12.0 12.0Q4.21875 12.0 4.078125 12.0703125Q3.9375 12.140625 3.8671875 12.2578125Q3.796875 12.375 3.75 17.203125Q3.75 17.203125 3.75 22.078125L3.84375 22.21875Q3.9375 22.3125 4.03125 22.40625Q4.03125 22.40625 4.171875 22.5H12.0H19.828125L19.96875 22.40625Q20.0625 22.3125 20.15625 22.21875Q20.15625 22.21875 20.25 22.078125V17.203125Q20.203125 12.375 20.1328125 12.2578125Q20.0625 12.140625 19.921875 12.09375Z"/></svg><b>Group your bags</b><span>Essentials, everyday, saving for, owing.</span></li>
+      <li><svg class="ion" width="22" height="22" viewBox="0 3 24 24" fill="currentColor" aria-hidden="true"><path d="M11.671875 6.609375Q11.671875 6.609375 11.671875 6.609375Q12.09375 6.46875 12.515625 6.703125Q12.703125 6.796875 16.1953125 10.3125Q19.6875 13.828125 19.78125 14.0625Q19.875 14.296875 19.875 14.4375Q19.875 14.8125 19.59375 15.140625Q19.125 15.75 18.375 15.515625Q18.1875 15.421875 15.6796875 12.9375Q13.171875 10.453125 13.1484375 10.453125Q13.125 10.453125 13.125 16.546875Q13.125 16.546875 13.078125 22.640625L12.984375 22.828125Q12.796875 23.203125 12.375 23.34375Q12.0 23.484375 11.625 23.34375Q11.203125 23.203125 11.015625 22.828125Q11.015625 22.828125 10.921875 22.640625L10.875 16.5V10.359375L8.34375 12.890625Q5.8125 15.421875 5.625 15.515625Q4.875 15.75 4.40625 15.140625Q4.125 14.8125 4.125 14.4375Q4.125 14.296875 4.1953125 14.0625Q4.265625 13.828125 7.7578125 10.3359375Q11.25 6.84375 11.390625 6.75Q11.53125 6.65625 11.671875 6.609375Z"/></svg><b>Log a spend</b><span>Every one, or rough amounts when you remember. Both work.</span></li>
+      <li><svg class="ion" width="22" height="22" viewBox="0 3 24 24" fill="currentColor" aria-hidden="true"><path d="M5.625 4.640625Q5.859375 4.453125 6.1640625 4.5234375Q6.46875 4.59375 6.65625 4.875Q6.75 5.015625 6.75 5.53125V6.0H12.0H17.25V5.53125Q17.25 5.015625 17.34375 4.875Q17.578125 4.5 18.0 4.5Q18.421875 4.5 18.65625 4.875Q18.75 5.015625 18.75 5.484375V6.0H19.40625Q20.25 6.046875 20.765625 6.28125Q22.03125 6.890625 22.40625 8.296875Q22.5 8.53125 22.5234375 15.4453125Q22.546875 22.359375 22.5 22.78125Q22.359375 23.859375 21.65625 24.609375Q20.90625 25.359375 19.828125 25.5Q19.453125 25.5 12.0 25.5Q4.546875 25.5 4.171875 25.5Q3.140625 25.359375 2.390625 24.65625Q1.640625 23.859375 1.5 22.78125Q1.453125 22.359375 1.4765625 15.4453125Q1.5 8.53125 1.59375 8.296875Q1.96875 6.890625 3.234375 6.28125Q3.75 6.046875 4.59375 6.0H5.25V5.484375Q5.25 4.828125 5.625 4.640625ZM20.015625 7.59375Q19.78125 7.5 12.0 7.5H4.171875L3.9375 7.59375Q3.515625 7.78125 3.234375 8.203125Q3.0 8.578125 3.0 9.375V9.75H12.0H21.0V9.328125Q21.0 8.90625 20.953125 8.671875Q20.765625 7.875 20.015625 7.59375ZM21.0 17.0625V11.25H12.0H3.0V17.0625V22.875L3.140625 23.109375Q3.375 23.625 3.890625 23.859375L4.125 24.0H12.0H19.875L20.109375 23.859375Q20.625 23.625 20.859375 23.109375L21.0 22.875ZM13.546875 12.796875Q13.640625 12.75 13.9453125 12.7734375Q14.25 12.796875 14.390625 12.890625Q15.0 13.21875 15.0 13.875Q15.0 14.4375 14.53125 14.7890625Q14.0625 15.140625 13.5 14.953125Q13.078125 14.8125 12.890625 14.390625Q12.65625 13.96875 12.84375 13.5Q13.03125 12.984375 13.546875 12.796875ZM18.0 12.84375Q18.421875 12.9375 18.6328125 13.359375Q18.84375 13.78125 18.703125 14.15625Q18.46875 14.90625 17.71875 15.0Q17.015625 15.046875 16.6640625 14.4609375Q16.3125 13.875 16.640625 13.3125Q16.828125 13.03125 17.203125 12.84375Q17.578125 12.65625 18.0 12.84375ZM5.90625 16.59375Q6.375 16.40625 6.890625 16.640625Q7.40625 16.875 7.4765625 17.4609375Q7.546875 18.046875 7.125 18.421875Q6.84375 18.75 6.375 18.75Q5.671875 18.75 5.34375 18.09375Q5.15625 17.625 5.34375 17.203125Q5.53125 16.78125 5.90625 16.59375ZM9.65625 16.59375Q9.84375 16.5 10.171875 16.546875Q10.875 16.546875 11.15625 17.15625Q11.34375 17.53125 11.203125 18.0Q11.0625 18.421875 10.640625 18.6328125Q10.21875 18.84375 9.84375 18.703125Q9.09375 18.46875 9.0234375 17.71875Q8.953125 16.96875 9.65625 16.59375ZM13.5 16.59375Q13.640625 16.546875 13.875 16.5Q14.34375 16.5 14.71875 16.875Q15.140625 17.34375 14.953125 17.9296875Q14.765625 18.515625 14.15625 18.703125Q13.640625 18.84375 13.1953125 18.515625Q12.75 18.1875 12.75 17.625Q12.75 16.875 13.5 16.59375ZM17.109375 16.640625Q17.90625 16.265625 18.46875 16.875Q18.75 17.203125 18.75 17.625Q18.75 18.09375 18.421875 18.421875Q18.09375 18.75 17.625 18.75Q17.15625 18.75 16.875 18.421875Q16.453125 18.046875 16.5234375 17.4609375Q16.59375 16.875 17.109375 16.640625ZM6.140625 20.296875Q6.65625 20.15625 7.078125 20.5078125Q7.5 20.859375 7.5 21.375Q7.5 22.078125 6.8671875 22.3828125Q6.234375 22.6875 5.671875 22.21875Q5.109375 21.75 5.296875 21.09375Q5.484375 20.390625 6.140625 20.296875ZM9.84375 20.296875Q10.21875 20.203125 10.640625 20.4140625Q11.0625 20.625 11.203125 21.0Q11.34375 21.46875 11.15625 21.84375Q10.96875 22.21875 10.640625 22.359375Q10.265625 22.546875 9.84375 22.453125Q9.28125 22.3125 9.09375 21.75Q8.90625 21.28125 9.1171875 20.859375Q9.328125 20.4375 9.84375 20.296875ZM13.59375 20.296875Q13.59375 20.296875 13.59375 20.296875Q14.109375 20.15625 14.53125 20.4609375Q14.953125 20.765625 15.0 21.28125Q15.046875 22.21875 14.15625 22.453125Q13.640625 22.59375 13.21875 22.2890625Q12.796875 21.984375 12.75 21.46875Q12.703125 20.53125 13.59375 20.296875Z"/></svg><b>Plan next month</b><span>Decide it before it starts, then fund it as income comes in.</span></li>
+      <li><svg class="ion" width="22" height="22" viewBox="0 3 24 24" fill="currentColor" aria-hidden="true"><path d="M16.640625 5.25Q17.859375 5.15625 18.84375 5.90625Q20.015625 6.84375 20.0625 8.578125V9.046875L20.203125 9.09375Q21.65625 9.421875 22.21875 10.78125Q22.453125 11.25 22.4765625 11.8359375Q22.5 12.421875 22.5 16.5Q22.5 21.421875 22.453125 21.703125Q22.03125 23.203125 20.625 23.765625Q20.203125 23.953125 19.2890625 23.9765625Q18.375 24.0 12.0 24.0Q5.625 24.0 4.7109375 23.9765625Q3.796875 23.953125 3.375 23.765625Q1.96875 23.203125 1.546875 21.703125Q1.5 21.421875 1.5 15.7265625Q1.5 10.03125 1.59375 9.75Q2.015625 8.109375 3.5625 7.546875Q3.84375 7.453125 10.171875 6.375Q16.5 5.296875 16.640625 5.25ZM17.625 6.890625Q17.25 6.75 16.453125 6.84375Q15.65625 6.9375 10.40625 7.828125Q4.125 8.90625 4.03125 9.0L3.890625 9.046875L4.078125 9.0Q4.3125 9.0 11.390625 9.0H18.515625V8.4375Q18.515625 7.921875 18.375 7.6875Q18.140625 7.171875 17.625 6.890625ZM20.015625 10.59375Q19.78125 10.5 12.0 10.5H4.171875L3.9375 10.59375Q3.1875 10.921875 3.046875 11.671875Q3.0 12.0 3.0 16.5703125Q3.0 21.140625 3.046875 21.375Q3.234375 22.078125 3.984375 22.40625L4.21875 22.5H12.0H19.78125L20.015625 22.40625Q20.8125 22.078125 20.953125 21.328125Q21.0 21.09375 21.0 16.5Q21.0 11.90625 20.953125 11.671875Q20.765625 10.875 20.015625 10.59375ZM16.921875 15.046875Q16.921875 15.046875 16.921875 15.046875Q17.390625 14.90625 17.90625 15.140625Q18.75 15.5625 18.75 16.5Q18.75 17.0625 18.375 17.484375Q17.859375 18.046875 17.1328125 18.0Q16.40625 17.953125 15.984375 17.296875Q15.75 16.921875 15.75 16.359375Q15.84375 15.328125 16.921875 15.046875Z"/></svg><b>Check your money</b><span>Count your cash and cards, and see if Piggy matches.</span></li>
+      <li><svg class="ion" width="22" height="22" viewBox="0 3 24 24" fill="currentColor" aria-hidden="true"><path d="M11.671875 6.609375Q11.671875 6.609375 11.671875 6.609375Q12.046875 6.515625 12.421875 6.6796875Q12.796875 6.84375 12.984375 7.171875Q12.984375 7.171875 13.078125 7.359375L13.125 13.453125Q13.125 19.546875 13.1484375 19.546875Q13.171875 19.546875 15.6796875 17.0625Q18.1875 14.578125 18.421875 14.484375Q18.84375 14.390625 19.2421875 14.578125Q19.640625 14.765625 19.78125 15.1875Q19.921875 15.5625 19.78125 15.9375Q19.6875 16.171875 16.171875 19.6875Q13.359375 22.546875 12.890625 22.96875Q12.421875 23.390625 12.046875 23.4375Q11.859375 23.4375 11.625 23.34375Q11.390625 23.25 7.875 19.78125Q5.015625 16.921875 4.59375 16.453125Q4.171875 15.984375 4.125 15.609375Q4.078125 14.953125 4.734375 14.578125Q5.109375 14.34375 5.578125 14.484375Q5.8125 14.578125 8.34375 17.109375Q8.34375 17.109375 10.875 19.640625V13.546875Q10.875 7.5 10.921875 7.359375Q11.109375 6.84375 11.671875 6.609375Z"/></svg><b>Start a bag owing</b><span>Say how much you owe, and watch it climb back to zero.</span></li>
     </ul>
   </section>
 
-  <section>
-    <h2>Your data stays with you</h2>
-    <p>Your budget lives on your phone. No bank connection, no ads, and no account on a server. Piggy counts anonymous events, such as "a bag was made", to see which parts of the app get used. No amounts, no bag names, no notes, and nothing that identifies you. You can turn it off in Settings.</p>
-    <p><a href="https://beginyanarthur.github.io/piggy-privacy/">Read the privacy policy</a></p>
-  </section>
+  <section id="how">
+    <p class="kicker">How it goes</p>
+    <h2>A month with Piggy</h2>
+    <p class="lead-in">Five steps, every month. They change a little each time, because what you want changes.</p>
 
-  <section>
-    <h2>Where it is</h2>
-    <p>Piggy is in a closed beta on iPhone, with a small group of testers. Every feature, including Golden Piggy, is unlocked while the beta runs. Follow the channel to hear when it opens up.</p>
-    <div class="links">
-      <a class="link" href="https://t.me/piggy_research">Telegram <span>news about Piggy</span></a>
-      <a class="link" href="https://www.linkedin.com/company/piggy-piggy-piggy/">LinkedIn <span>the story behind it</span></a>
+    <div class="walk">
+      <div class="row">
+        <img class="shot" src="art/income.webp" alt="Add income: 750,000 dram typed in, a field for where it came from, and the date" width="1003" height="2000" loading="lazy">
+        <div class="said">
+          <h3><span class="step-no">1</span><span>Money comes in</span></h3>
+          <p>Your salary, a side job, a gift. Piggy holds it until you say where it goes. Give each bag its share, and what is left to allocate counts down to zero.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <img class="shot" src="art/bag-trip.webp" alt="A trip bag with an airport photo on top: 230,000 dram left to spend of 250,000 allocated, and its history" width="1003" height="2000" loading="lazy">
+        <div class="said">
+          <h3><span class="step-no">2</span><span>A want becomes a bag</span></h3>
+          <p>A trip in June. A laptop. Money for the month everything goes wrong. Make a bag for it, give it what you can, and it starts filling up.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <img class="shot" src="art/spend.webp" alt="The log a spend sheet: bags grouped into essentials, everyday, saving for and owing, each showing what is left in it" width="1073" height="2000" loading="lazy">
+        <div class="said">
+          <h3><span class="step-no">3</span><span>You spend from a bag</span></h3>
+          <p>Tap the button, pick the bag, type the amount. Each bag shows what is left while you choose, so you know before you spend and not after.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <img class="shot" src="art/check.webp" alt="The money check: what your bags hold, with a button to count what you really have" width="1003" height="2000" loading="lazy">
+        <div class="said">
+          <h3><span class="step-no">4</span><span>You check the real money</span></h3>
+          <p>Does Piggy match the money you really have? Count your cash and cards to find out. If the two do not agree, Piggy helps you fix the difference.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <img class="shot" src="art/plan.webp" alt="Start planning October: copy September's bags and amounts, or start from scratch" width="1003" height="2000" loading="lazy">
+        <div class="said">
+          <h3><span class="step-no">5</span><span>You plan the next month</span></h3>
+          <p>Most months look like the one before. Copy the last one or start from scratch, then change what needs changing. More here, less there, and it starts again.</p>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section>
-    <h2>Questions or problems</h2>
+  <section id="safe">
+    <p class="kicker">Your data</p>
+    <h2>It stays on your phone</h2>
+    <div class="privacy">
+      <div>
+        <ul class="safe">
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12l4.5 4.5L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span><strong>No bank login, no account.</strong> Your numbers are not on anyone's server, mine included.</span></li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12l4.5 4.5L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span><strong>Face ID can lock it.</strong> Piggy opens for you and nobody else.</span></li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12l4.5 4.5L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span><strong>Backups can be locked.</strong> Add a password before a backup leaves the app, and without it the file cannot be read.</span></li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12l4.5 4.5L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span><strong>No ads, ever.</strong> Nothing here is paid for by watching what you buy.</span></li>
+        </ul>
+        <p>Piggy does count anonymous events, such as "a bag was made", to see which parts of the app get used. No amounts, no bag names, no notes, nothing that says who you are. You can switch it off in Settings.</p>
+        <p><a href="https://beginyanarthur.github.io/piggy-privacy/">Read the privacy policy</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="help">
+    <p class="kicker">Support</p>
+    <h2>Need a hand?</h2>
+    <p>Write and you will get a real answer, from the person who made it.</p>
     <div class="facts">
-      <dl class="fact"><dt>Support</dt><dd><a href="https://beginyanarthur.github.io/piggy-privacy/support.html">The support page</a></dd></dl>
-      <dl class="fact"><dt>Email</dt><dd><a href="mailto:beginyan.arthur@gmail.com">beginyan.arthur@gmail.com</a></dd></dl>
-      <dl class="fact"><dt>News</dt><dd><a href="https://t.me/piggy_research">The Telegram channel</a>, for what is new. Help comes by email.</dd></dl>
+      <dl class="fact"><dt>Stuck on something</dt><dd><a href="https://beginyanarthur.github.io/piggy-privacy/support.html">The support page</a></dd></dl>
+      <dl class="fact"><dt>Say hello</dt><dd><a href="mailto:beginyan.arthur@gmail.com">beginyan.arthur@gmail.com</a></dd></dl>
+      <dl class="fact"><dt>What is new</dt><dd><a href="https://t.me/piggy_research">The Telegram channel</a>. Help comes by email.</dd></dl>
+    </div>
+  </section>
+
+  <!--
+    The page ends on the ask, not on the small print, and it ends in the app's
+    own words: "Ready when you are" is what Home says when the month is
+    settled. Help comes before it, because a reader with a question is not
+    ready yet.
+  -->
+  <section class="closing">
+    <p class="kicker">The beta</p>
+    <h2>Ready when you are</h2>
+    <p>Piggy is in a closed beta on iPhone, with a small group of testers. Everything is unlocked while it runs, Golden Piggy included. Follow the channel to hear the day it opens.</p>
+    <div class="actions">
+      <span class="badge" aria-label="Coming to the App Store">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6.2" y="2.4" width="11.6" height="19.2" rx="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M10.6 5.5h2.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span>Coming to the App Store<small>iPhone, iOS 16.4 and later</small></span>
+      </span>
+      <a class="link" href="https://t.me/piggy_research"><svg class="tg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg> <em>Telegram</em> <span>news about Piggy</span></a>
+      <a class="link" href="https://www.linkedin.com/company/piggy-piggy-piggy/"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="color:#0A66C2"><path d="M4.98 3.5a2.5 2.5 0 110 5 2.5 2.5 0 010-5zM3 9.5h4v11H3v-11zm6.5 0h3.8v1.5h.05c.53-.95 1.83-1.95 3.77-1.95 4.03 0 4.78 2.5 4.78 5.76v5.69h-4v-5.04c0-1.2-.02-2.75-1.75-2.75-1.75 0-2.02 1.31-2.02 2.66v5.13h-4v-11z"/></svg> <em>LinkedIn</em> <span>the story behind it</span></a>
     </div>
   </section>
 
@@ -139,6 +592,52 @@
     <p>Made in Armenia by Artur Beginyan.</p>
     <p>Amounts are Armenian dram (֏).</p>
   </footer>
+
 </main>
+<script>
+/*
+  Two lines of state: what the system says, and what the reader has said,
+  which the script in the head has already applied.
+  Storage can throw in a private window, so every touch of it is guarded and
+  the page renders correctly when it comes back empty.
+*/
+(function () {
+  var root = document.documentElement;
+  var media = window.matchMedia("(prefers-color-scheme: dark)");
+  function showing() {
+    var set = root.getAttribute("data-theme");
+    return set || (media.matches ? "dark" : "light");
+  }
+  var button = document.getElementById("theme");
+  function label() {
+    button.setAttribute("aria-label", showing() === "dark" ? "Switch to light" : "Switch to dark");
+  }
+  /*
+    The screenshots can follow the theme, so a dark page shows the app in
+    dark. Any image with a data-dark path swaps to it in dark and back to its
+    own src in light; an image without one stays as it is.
+  */
+  function shots() {
+    var dark = showing() === "dark";
+    var imgs = document.querySelectorAll("img[data-dark]");
+    for (var i = 0; i < imgs.length; i++) {
+      var img = imgs[i];
+      if (!img.getAttribute("data-light")) img.setAttribute("data-light", img.getAttribute("src"));
+      var want = img.getAttribute(dark ? "data-dark" : "data-light");
+      if (img.getAttribute("src") !== want) img.setAttribute("src", want);
+    }
+  }
+  function sync() { label(); shots(); }
+  sync();
+  button.addEventListener("click", function () {
+    var next = showing() === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("piggy-theme", next); } catch (e) {}
+    sync();
+  });
+  // Until they press it, the page still follows the system as it changes.
+  media.addEventListener("change", function () { if (!root.getAttribute("data-theme")) sync(); });
+})();
+</script>
 </body>
 </html>
