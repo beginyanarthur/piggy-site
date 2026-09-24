@@ -52,6 +52,8 @@
     --pink: #D42D97;        /* pigPink */
     --income: #0A6A3B;      /* income */
     --pink-soft: #D42D971A; /* pigPink at a fill's weight, as incomeSoft is */
+    --pink-strong: #A82278; /* pigPinkDark, a solid button pressed or hovered */
+    --on-pink: #FFFFFF;     /* textInverse, words on a pink fill */
 
     /* The app's face, which is the system's: SF Pro on Apple, and whatever
        the platform's own UI face is everywhere else. One typography across
@@ -74,7 +76,7 @@
       --card: #3A4066;
       --line: #FFFFFF24; --line-strong: #FFFFFF73;
       --ink: #FFFFFF; --ink-dim: #FFFFFFCC; --ink-muted: #FFFFFFA6;
-      --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024;
+      --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-strong: #D6389C; --on-pink: #1B1E38;
     }
   }
   :root[data-theme="dark"] {
@@ -82,7 +84,7 @@
     --card: #3A4066;
     --line: #FFFFFF24; --line-strong: #FFFFFF73;
     --ink: #FFFFFF; --ink-dim: #FFFFFFCC; --ink-muted: #FFFFFFA6;
-    --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024;
+    --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-strong: #D6389C; --on-pink: #1B1E38;
   }
 
   * { box-sizing: border-box; }
@@ -430,6 +432,63 @@
     html { scroll-behavior: auto; }
     * { transition: none !important; }
   }
+
+  /*
+    The one solid button, the app's `solid` variant: accent fill, inverse
+    words, 48 tall. Used once per screen for the action the screen exists
+    for, and never more than one in view, as in the app. Every other action
+    stays an outline pill, which is what gives this one its weight.
+  */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--s-sm);
+    min-height: 48px; padding: 12px var(--s-lg);
+    border-radius: var(--r-pill); background: var(--pink); color: var(--on-pink);
+    font-weight: 600; font-size: 16px; text-decoration: none;
+    transition: background-color 150ms ease-out;
+  }
+  .btn:hover { background: var(--pink-strong); }
+  .btn:active { transform: translateY(1px); }
+  .btn svg { flex: none; }
+
+  /*
+    Three weights of section, so the page says what matters.
+
+    Loudest after the hero is the offer of a budget review: a white card
+    across the column, a bigger heading, the two offers inside it and the
+    page's one solid button. The story (what Piggy does, a month with it)
+    keeps the ordinary size. The reference sections, the data and the help,
+    step down: a smaller heading, less air, and a hairline between them, so
+    they read as reassurance and not as headlines.
+  */
+  .feature {
+    display: flex; flex-direction: column; gap: var(--s-lg);
+    max-width: 760px; padding: var(--s-xl);
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--r-xl);
+  }
+  .feature h2 { font-size: clamp(var(--t-h1), 4.4vw, var(--t-amount)); line-height: 1.15; margin: 0; }
+  .feature .lead-in { color: var(--ink-dim); }
+  .feature .head { display: flex; flex-direction: column; gap: var(--s-sm); }
+  .minis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-md); margin: 0; padding: 0; list-style: none; }
+  .minis li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: var(--s-md); align-items: start; padding: var(--s-md); border: 1px solid var(--line); border-radius: var(--r-md); }
+  .minis li > span { display: flex; flex-direction: column; gap: var(--s-xs); font-size: var(--t-body-app); color: var(--ink-dim); }
+  .minis b { font-size: var(--t-h3); color: var(--ink); }
+  .minis .ion { width: 40px; height: 40px; padding: 9px; border-radius: var(--r-md); background: var(--pink-soft); color: var(--pink); }
+  .feature .actions { gap: var(--s-md); align-items: center; }
+  .quiet-link { color: var(--ink-dim); font-weight: 600; font-size: var(--t-body-app); }
+  @media (max-width: 560px) {
+    .feature { padding: var(--s-lg) var(--s-md); border-radius: var(--r-lg); }
+    .minis { grid-template-columns: 1fr; }
+  }
+
+  .quiet { padding-block: var(--s-xl); }
+  .quiet > h2 { font-size: var(--t-h2); }
+  .quiet + .quiet { border-top: 1px solid var(--line); }
+
+  /* The last word, centred and a size up, with one solid way to follow. */
+  .closing { align-items: center; text-align: center; padding-block: var(--s-xxl) var(--s-xxl); }
+  .closing > h2 { font-size: clamp(var(--t-h1), 4.4vw, var(--t-amount)); }
+  .closing > p { max-width: 34em; }
+  .closing .actions { justify-content: center; }
 </style>
 </head>
 <body>
@@ -545,14 +604,23 @@
     so the front page stays about the app.
   -->
   <section id="review">
-    <h2>Budget reviews, one to one</h2>
-    <p class="lead-in">A video call with me, in Armenian or English, to start budgeting or to check how it is going.</p>
-    <div class="actions">
-      <a class="link" href="reviews.html"><em>See how it works</em> <span>and ask for the price</span></a>
+    <div class="feature">
+      <div class="head">
+        <h2>Budget reviews, one to one</h2>
+        <p class="lead-in">A video call in Armenian or English. You talk, I listen, and we look at your money together.</p>
+      </div>
+      <ul class="minis">
+        <li><svg class="ion" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.59 1.52Q19.92 1.52 20.62 1.52Q21.84 1.52 22.17 1.9Q22.36 2.13 22.41 2.6Q22.59 3.4 22.45 4.48Q22.17 6.68 21.02 9.19Q19.88 11.7 18.33 13.57Q17.3 14.84 16.08 15.77L15.8 16.01V16.62Q15.75 17.55 15.52 18.3Q14.81 20.46 12.47 21.63Q10.78 22.48 9.61 22.48Q9.19 22.48 8.86 22.17Q8.53 21.87 8.48 21.4Q8.48 21.26 8.67 19.71L8.81 18.16H8.72Q8.3 18.07 8.04 17.88Q7.78 17.7 7.03 16.95Q6.28 16.2 6.09 15.94Q5.91 15.68 5.86 15.35L5.81 15.12L5.62 15.16Q5.48 15.16 4.08 15.35Q2.48 15.49 2.11 15.35Q1.78 15.16 1.59 14.74Q1.41 14.32 1.78 13.01Q2.34 10.99 3.56 9.77Q5.16 8.18 7.69 8.18H7.97L8.25 7.8Q9.84 5.84 12.23 4.34Q16.03 1.99 19.59 1.52ZM20.95 3.07Q20.91 3.02 20.53 2.98Q18.19 2.93 14.67 4.71Q11.11 6.49 9.14 9.07Q8.86 9.45 8.72 9.59L8.58 9.68L7.64 9.73Q6.56 9.73 6 9.91Q4.17 10.57 3.38 12.96Q3.05 13.85 3.09 13.9Q3.09 13.95 4.71 13.76Q6.33 13.57 6.54 13.57Q6.75 13.57 6.94 13.71Q7.22 13.9 7.27 14.6L7.31 15.12L8.11 15.87L8.86 16.66L9.38 16.71Q9.98 16.76 10.22 16.95Q10.41 17.18 10.41 17.46Q10.41 17.65 10.22 19.27Q10.03 20.88 10.03 20.88Q10.12 20.98 11.16 20.55Q13.73 19.62 14.2 17.46Q14.25 17.18 14.3 16.29Q14.3 15.49 14.37 15.33Q14.44 15.16 14.91 14.84Q16.41 13.66 17.58 12.12Q20.2 8.6 20.86 4.76Q20.95 4.34 20.98 3.73Q21 3.12 20.95 3.07ZM17.86 7.34Q18.19 7.99 18.14 8.7Q18.09 9.63 17.53 10.34Q16.59 11.41 15.23 11.32Q14.2 11.23 13.5 10.52Q12.66 9.63 12.7 8.46Q12.75 7.38 13.45 6.68Q14.16 5.98 15.05 5.86Q15.94 5.74 16.71 6.16Q17.48 6.59 17.86 7.34ZM15.98 7.48Q15.8 7.38 15.47 7.34Q14.86 7.34 14.48 7.76Q14.2 8.09 14.2 8.55Q14.2 9.12 14.62 9.49Q14.95 9.82 15.49 9.8Q16.03 9.77 16.34 9.42Q16.64 9.07 16.64 8.55Q16.64 7.8 15.98 7.48ZM4.64 15.82Q4.64 15.82 4.64 15.82Q5.53 15.59 5.81 16.15Q5.95 16.43 5.81 16.78Q5.67 17.13 5.34 17.18Q4.69 17.32 4.43 17.62Q4.17 17.93 3.98 18.77Q3.75 20.09 3.8 20.18Q3.84 20.18 4.5 20.09Q5.16 19.99 5.48 19.9Q5.86 19.8 6.09 19.66Q6.61 19.43 6.8 18.63Q6.84 18.35 7.17 18.19Q7.5 18.02 7.83 18.16Q8.48 18.49 8.11 19.52Q7.59 20.93 5.77 21.4Q5.06 21.54 4.05 21.66Q3.05 21.77 2.81 21.68Q2.39 21.59 2.3 21.16Q2.2 20.93 2.32 19.85Q2.44 18.77 2.62 18.12Q2.95 16.85 3.61 16.34Q4.08 15.96 4.64 15.82Z"/></svg><span><b>Start</b>You want to begin. We set up your bags together.</span></li>
+        <li><svg class="ion" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.91 1.97Q11.91 1.97 11.91 1.97Q12.09 1.93 12.38 2.07Q12.47 2.12 14.46 4.11Q16.45 6.1 16.48 6.29Q16.5 6.47 16.5 6.52Q16.5 6.57 16.48 6.69Q16.45 6.8 14.44 8.82Q12.42 10.83 12.28 10.93Q12 11.02 11.72 10.93Q11.25 10.74 11.25 10.22Q11.25 9.99 11.48 9.71Q11.72 9.43 12.7 8.44Q13.12 8.02 13.41 7.74Q13.69 7.46 13.83 7.29Q13.97 7.13 13.97 7.13Q13.92 7.08 12.8 7.04Q11.2 7.04 10.36 7.27Q8.67 7.69 7.38 8.91Q6.09 10.13 5.58 11.77Q4.92 13.88 5.58 15.85Q6.28 17.96 8.04 19.25Q9.8 20.54 12 20.54Q14.2 20.54 15.98 19.22Q17.77 17.91 18.42 15.8Q18.66 15.05 18.7 14.16Q18.75 13.6 18.84 13.41Q18.94 13.22 19.22 13.08Q19.5 12.99 19.78 13.08Q20.25 13.32 20.25 13.97Q20.25 15.1 19.83 16.37Q19.22 18.19 17.84 19.58Q16.45 20.96 14.62 21.62Q12 22.46 9.38 21.62Q7.12 20.87 5.62 19.04Q4.12 17.21 3.8 14.87Q3.7 13.83 3.8 12.85Q4.08 10.74 5.27 9.03Q6.47 7.32 8.39 6.38Q9.56 5.82 10.83 5.63Q11.25 5.54 12.33 5.54Q13.41 5.54 13.59 5.58Q13.59 5.58 13.83 5.63L12.56 4.37Q11.58 3.38 11.41 3.15Q11.25 2.91 11.25 2.68Q11.25 2.49 11.41 2.28Q11.58 2.07 11.77 2.02Q11.86 2.02 11.91 1.97Z"/></svg><span><b>Check up</b>You already budget. We look at a month and find what to change.</span></li>
+      </ul>
+      <div class="actions">
+        <a class="btn" href="mailto:beginyan.arthur@gmail.com?subject=Budget%20review%3A%20please%20send%20me%20the%20price&amp;body=Hi%20Artur%2C%0A%0AI%20am%20interested%20in%20a%20budget%20review.%20Please%20send%20me%20the%20price.%0A%0AStart%20or%20check%20up%3A%20%0AArmenian%20or%20English%3A%20%0A"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.52 3.84Q3.8 3.75 11.98 3.75Q20.16 3.75 20.44 3.8Q21.14 3.98 21.68 4.5Q22.22 5.02 22.41 5.72Q22.5 6 22.5 12Q22.5 18 22.41 18.28Q21.98 19.78 20.53 20.16Q20.25 20.25 12 20.25Q3.75 20.25 3.47 20.16Q2.95 20.02 2.48 19.64Q1.83 19.12 1.59 18.28Q1.5 18 1.5 12Q1.5 6 1.59 5.72Q1.73 5.2 2.06 4.78Q2.62 4.03 3.52 3.84ZM20.34 5.34 20.16 5.25H12.09Q4.08 5.25 3.89 5.3Q3.38 5.39 3.09 5.91L3 6.05V12V17.95L3.09 18.09Q3.33 18.47 3.66 18.66L3.84 18.75H12H20.16L20.34 18.66Q20.72 18.47 20.91 18.09L21 17.91V12V6.09L20.91 5.91Q20.72 5.53 20.34 5.34ZM4.92 6.84Q4.92 6.84 4.92 6.84Q5.25 6.66 5.58 6.84Q5.72 6.89 8.86 9.38Q8.86 9.38 12 11.81L15.14 9.38Q18.28 6.89 18.42 6.84Q18.7 6.7 19.01 6.8Q19.31 6.89 19.41 7.17Q19.5 7.31 19.5 7.5Q19.5 7.69 19.43 7.8Q19.36 7.92 19.27 8.06Q19.08 8.2 15.75 10.78Q12.42 13.36 12.33 13.41Q12 13.59 11.67 13.41Q11.58 13.36 8.25 10.78Q4.92 8.2 4.73 8.06Q4.5 7.83 4.5 7.5Q4.5 7.03 4.92 6.84Z"/></svg>I am interested</a>
+        <a class="quiet-link" href="reviews.html">See how it works</a>
+      </div>
     </div>
   </section>
 
-  <section id="safe">
+  <section id="safe" class="quiet">
     <p class="kicker">Your data</p>
     <h2>It stays on your phone</h2>
     <div class="privacy">
@@ -569,7 +637,7 @@
     </div>
   </section>
 
-  <section id="help">
+  <section id="help" class="quiet">
     <p class="kicker">Support</p>
     <h2>Need a hand?</h2>
     <p>Write and you will get a real answer, from the person who made it.</p>
@@ -595,7 +663,7 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6.2" y="2.4" width="11.6" height="19.2" rx="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M10.6 5.5h2.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         <span>Coming to the App Store<small>iPhone, iOS 16.4 and later</small></span>
       </span>
-      <a class="link" href="https://t.me/piggy_research"><svg class="tg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg> <em>Telegram</em> <span>news about Piggy</span></a>
+      <a class="btn" href="https://t.me/piggy_research"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>Follow on Telegram</a>
       <a class="link" href="https://www.linkedin.com/company/piggy-piggy-piggy/"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="color:#0A66C2"><path d="M4.98 3.5a2.5 2.5 0 110 5 2.5 2.5 0 010-5zM3 9.5h4v11H3v-11zm6.5 0h3.8v1.5h.05c.53-.95 1.83-1.95 3.77-1.95 4.03 0 4.78 2.5 4.78 5.76v5.69h-4v-5.04c0-1.2-.02-2.75-1.75-2.75-1.75 0-2.02 1.31-2.02 2.66v5.13h-4v-11z"/></svg> <em>LinkedIn</em> <span>the story behind it</span></a>
     </div>
   </section>
