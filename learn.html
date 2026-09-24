@@ -245,7 +245,7 @@
     moves until a hand does, and nothing moves at all under reduced motion.
   */
   main.wrap.wide > .lgrid, main.wrap.wide > .chips, main.wrap.wide > .veil, main.wrap.wide > .reader { max-width: none; }
-  .lgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-md); margin-bottom: var(--s-xxl); }
+  .lgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-lg); margin-bottom: var(--s-xxl); }
   /* The article is the steady box the pointer is measured against; only the
      button inside it leans, so a tilting edge never slips out from under
      the pointer and flickers. */
@@ -253,7 +253,7 @@
   .lcard[hidden] { display: none; }
   .lcard-b {
     display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-sm);
-    width: 100%; height: 100%; min-height: 250px; padding: var(--s-lg) var(--s-md) var(--s-md);
+    width: 100%; height: 100%; min-height: 280px; padding: var(--s-xl);
     text-align: left; cursor: pointer; font: inherit; color: var(--ink);
     background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg);
     transform: perspective(700px) translateY(var(--lift, 0px)) scale(var(--grow, 1)) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
@@ -280,11 +280,11 @@
   }
   .lcard-i svg { width: 24px; height: 24px; }
   .lcard-b:hover .lcard-i { transform: translateY(-2px) scale(1.06); }
-  .lcard-meta { display: flex; gap: var(--s-sm); margin-top: var(--s-xs); font-size: var(--t-caption); color: var(--ink-muted); }
+  .lcard-meta { display: flex; gap: var(--s-sm); margin-top: var(--s-md); margin-bottom: var(--s-sm); font-size: var(--t-caption); color: var(--ink-muted); }
   .lcard-meta .cat { font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; color: var(--ink-dim); }
   .lcard-t { font-size: var(--t-h3); font-weight: 600; line-height: 1.3; text-wrap: balance; }
-  .lcard-s { font-size: var(--t-body-app); line-height: 1.5; color: var(--ink-dim); }
-  .lcard-more { margin-top: auto; padding-top: var(--s-sm); font-size: var(--t-body-app); font-weight: 600; color: var(--pink); }
+  .lcard-s { font-size: var(--t-body-app); line-height: 1.55; color: var(--ink-dim); margin-top: var(--s-xs); }
+  .lcard-more { margin-top: auto; padding-top: var(--s-lg); font-size: var(--t-body-app); font-weight: 600; color: var(--pink); }
   /* The article's words: in the card they wait for the reader; with no
      script they simply show under the summary. */
   :root.js .lcard-body { display: none; }
