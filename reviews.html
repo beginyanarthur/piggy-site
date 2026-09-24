@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Piggy: budget reviews</title>
+<meta name="description" content="Budget reviews, one to one, on a video call in Armenian or English. Start budgeting, or check how it is going.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="art/icon.png">
+<script>
+  /* The reader's saved theme, set before the first paint so a page they
+     chose dark does not flash light on the way in. */
+  try { var t = localStorage.getItem("piggy-theme"); if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+</script>
+<style>
+  /*
+    The front page's system, carried over whole so every page reads as one
+    site. The block below is copied from index.html; when that changes, this
+    changes.
+  */
+  /*
+    The tokens below are the app's own, lifted from src/theme/index.ts, so the
+    page and the product are measured with one ruler.
+
+      spacing  4 · 8 · 16 · 24 · 32 · 48        (spacing)
+      radius   8 · 16 · 22 · 28 · 999           (radius)
+      type     11 · 13 · 15 · 18 · 22 · 28 · 34 · 42, each step about a fifth
+               larger than the one below       (typography)
+
+    Two deliberate differences, both because a page is read once and an app is
+    used daily. The colours are paper rather than indigo, so the screenshots
+    carry the product's colour and the page around them stays quiet. And body
+    text steps up one rung, from the app's 15 to 17, because a screen held at
+    arm's length is not a screen held in the hand.
+  */
+  :root {
+    /*
+      The app's palette, key for key, from src/theme/colors.ts. Decided
+      23 September 2026: the page had its own paper colours, and a site that
+      is a different colour from the product it sells is a site working
+      against itself. The screenshots now sit on their own ground instead of
+      being pasted onto someone else's.
+    */
+    --bg-top: #EBEEF7;      /* bgTop */
+    --bg-bottom: #DFE3F1;   /* bgBottom */
+    --card: #FFFFFF;        /* surface */
+    --line: #1B1E3824;      /* border, a divider */
+    --line-strong: #1B1E3880; /* borderStrong, the edge of a control */
+    --ink: #1B1E38;         /* textPrimary */
+    --ink-dim: #1B1E38D1;   /* textSecondary */
+    --ink-muted: #1B1E38A8; /* textMuted */
+    --pink: #D42D97;        /* pigPink */
+    --income: #0A6A3B;      /* income */
+    --pink-soft: #D42D971A; /* pigPink at a fill's weight, as incomeSoft is */
+
+    /* The app's face, which is the system's: SF Pro on Apple, and whatever
+       the platform's own UI face is everywhere else. One typography across
+       the app and the site was the point. */
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
+
+    /* spacing, verbatim */
+    --s-xs: 4px; --s-sm: 8px; --s-md: 16px; --s-lg: 24px; --s-xl: 32px; --s-xxl: 48px;
+    /* radius, verbatim */
+    --r-sm: 8px; --r-md: 16px; --r-lg: 22px; --r-xl: 28px; --r-pill: 999px;
+    /* typography, the rungs the page uses */
+    --t-micro: 11px; --t-caption: 13px; --t-body-app: 15px; --t-h3: 18px;
+    --t-h2: 22px; --t-h1: 28px; --t-amount: 34px; --t-display: 42px;
+
+    --gutter: var(--s-lg);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg-top: #2E3358; --bg-bottom: #1B1E38;
+      --card: #3A4066;
+      --line: #FFFFFF24; --line-strong: #FFFFFF73;
+      --ink: #FFFFFF; --ink-dim: #FFFFFFCC; --ink-muted: #FFFFFFA6;
+      --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg-top: #2E3358; --bg-bottom: #1B1E38;
+    --card: #3A4066;
+    --line: #FFFFFF24; --line-strong: #FFFFFF73;
+    --ink: #FFFFFF; --ink-dim: #FFFFFFCC; --ink-muted: #FFFFFFA6;
+    --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024;
+  }
+
+  * { box-sizing: border-box; }
+  /* Money lines up in the app and it lines up here. */
+  .num { font-variant-numeric: tabular-nums; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    /*
+      One screen of the app's gradient, held still while the page scrolls, so
+      every scroll position shows what a screen of Piggy shows: top to bottom,
+      bgTop to bgBottom. A gradient stretched over the whole document would be
+      a wash nobody could see.
+    */
+    background: linear-gradient(var(--bg-top), var(--bg-bottom)) fixed;
+    background-color: var(--bg-bottom);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding-inline: var(--gutter); }
+  .wrap.wide { max-width: 1060px; }
+
+  /* The bar that says which site this is, on every page of it. */
+  .site {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bg-top);
+    border-bottom: 1px solid var(--line);
+  }
+  .site .wrap { display: flex; align-items: center; gap: var(--s-md); padding-block: 10px; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); margin-right: auto; }
+  .brand img { width: 28px; height: 28px; border-radius: var(--s-sm); display: block; }
+  .brand b { font-size: var(--t-h3); font-weight: 700; letter-spacing: 0.2px; }
+  .nav { display: flex; gap: var(--s-sm); }
+  /* The padding is the tap target: 15px of text is a 20px line, and a thumb
+     needs 44. It reads as spacing and works as a button. */
+  .nav a {
+    color: var(--ink-dim); text-decoration: none; font-size: var(--t-body-app);
+    padding: 12px var(--s-sm); border-radius: var(--r-sm); white-space: nowrap;
+    transition: color 150ms ease-out;
+  }
+  .nav a:hover { color: var(--ink); }
+  /* On a phone the bar is brand, three links and the switch in 327px, so the
+     air between them comes down to the app's `sm` and the switch keeps its
+     full 36: squeezed, it went oval and ran past the gutter. */
+  @media (max-width: 420px) {
+    .site .wrap { gap: var(--s-sm); }
+    .nav { gap: 0; } .nav a { font-size: 14px; padding-inline: var(--s-xs); }
+    .theme { margin-left: 0; }
+  }
+  /*
+    Light or dark, the reader's choice, the way the app lets them choose.
+
+    It follows the system until they press it, and after that their choice is
+    remembered on this browser. The moon shows while the page is light,
+    because a button says where it takes you.
+  */
+  .theme {
+    flex: none; margin-left: var(--s-md); display: grid; place-items: center;
+    width: 36px; height: 36px; padding: 0;
+    border: 1px solid var(--line-strong); border-radius: var(--r-pill);
+    background: var(--card); color: var(--ink-dim); cursor: pointer;
+    transition: color 150ms ease-out, border-color 150ms ease-out;
+  }
+  .theme:hover { color: var(--ink); border-color: var(--pink); }
+  .theme .i-light { display: none; }
+  .theme .i-dark { display: block; }
+  :root[data-theme="dark"] .theme .i-light { display: block; }
+  :root[data-theme="dark"] .theme .i-dark { display: none; }
+  /* Dark because the system is, before anyone has pressed it. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .theme .i-light { display: block; }
+    :root:not([data-theme]) .theme .i-dark { display: none; }
+  }
+
+  /* The app's scale: display 42 and h1 28, both at 700, h2 at 22. The web
+     gets the top of that scale for the hero and the h1 size for sections. */
+  h1, h2 { font-family: var(--font); margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(var(--t-h1), 5.4vw, var(--t-display)); line-height: 1.12; font-weight: 700; letter-spacing: -0.01em; }
+  h2 { font-size: clamp(var(--t-h2), 3.6vw, var(--t-h1)); line-height: 1.2; font-weight: 700; letter-spacing: 0.2px; }
+  p { margin: 0; }
+  /* Pink is what the app makes tappable: "Add a bag", "Plan October". There
+     is no teal in Piggy, so there is none here. */
+  a { color: var(--pink); }
+
+  main.wrap.wide > * { max-width: 720px; }
+  .nav a[aria-current="page"] { color: var(--ink); font-weight: 600; }
+
+  .top { padding-block: var(--s-xxl) var(--s-lg); display: flex; flex-direction: column; gap: var(--s-md); }
+  .kicker {
+    font-size: var(--t-caption); font-weight: 600; letter-spacing: 0.6px;
+    text-transform: uppercase; color: var(--ink-muted);
+  }
+  .lede { font-size: clamp(var(--t-h3), 2.4vw, var(--t-h2)); line-height: 1.45; color: var(--ink); text-wrap: balance; }
+  strong { color: var(--ink); font-weight: 600; }
+
+
+  footer { padding-block: var(--s-lg) 72px; color: var(--ink-dim); font-size: 14.5px; display: flex; flex-direction: column; gap: 6px; }
+
+  :target { scroll-margin-top: 76px; }
+  .skip {
+    position: absolute; left: var(--gutter); top: -60px; z-index: 20;
+    background: var(--card); color: var(--ink); text-decoration: none;
+    border: 1px solid var(--line-strong); border-radius: var(--r-pill);
+    padding: 10px 18px; font-weight: 600; font-size: var(--t-body-app);
+    transition: top 150ms ease-out;
+  }
+  .skip:focus { top: 10px; }
+  :focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; border-radius: var(--r-sm); }
+  .theme:active { transform: translateY(1px); }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+
+  section { padding-block: var(--s-xl); display: flex; flex-direction: column; gap: var(--s-md); }
+  section > .kicker + h2 { margin-top: calc(var(--s-sm) * -1); }
+  .card { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--card); overflow: hidden; }
+
+  /* The two offers, the same size side by side: neither is the upsell. */
+  .offers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-md); margin: 0; padding: 0; list-style: none; }
+  .offers li { display: flex; flex-direction: column; gap: var(--s-sm); padding: var(--s-md) var(--s-md) var(--s-lg); background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); }
+  .offers b { font-size: var(--t-h3); font-weight: 600; color: var(--ink); }
+  .offers span { font-size: var(--t-body-app); color: var(--ink-dim); }
+  @media (max-width: 560px) { .offers { grid-template-columns: 1fr; } }
+
+  /* The app's row: a 40 point badge, then the words. */
+  .row-i { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: var(--s-md); align-items: start; padding: var(--s-md) 18px; border-bottom: 1px solid var(--line); }
+  .row-i:last-child { border-bottom: 0; }
+  .row-i > div { display: flex; flex-direction: column; gap: var(--s-xs); padding-top: 2px; }
+  .row-i h3 { margin: 0; font-size: 17px; font-weight: 600; line-height: 1.4; color: var(--ink); }
+  .row-i p { color: var(--ink-dim); }
+  .badge-i, .offers .ion { width: 40px; height: 40px; padding: 9px; border-radius: var(--r-md); background: var(--pink-soft); color: var(--pink); flex: none; }
+  /* A step's number sits in the badge, since the order is the point. */
+  .num-i { display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--r-md); background: var(--pink-soft); color: var(--pink); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .link {
+    display: inline-flex; align-items: center; gap: var(--s-xs) var(--s-sm); flex-wrap: wrap;
+    border: 1px solid var(--line-strong); border-radius: var(--r-pill); background: var(--card);
+    padding: 10px 18px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: var(--t-body-app);
+    transition: border-color 150ms ease-out;
+  }
+  .link:hover { border-color: var(--pink); }
+  .link em, .link span { white-space: nowrap; }
+  .link em { font-style: normal; }
+  .link span { color: var(--ink-dim); font-weight: 400; }
+  .link svg { width: 18px; height: 18px; color: var(--pink); flex: none; }
+</style>
+</head>
+<body>
+
+<a class="skip" href="#offers">Skip to the offers</a>
+
+<div class="site">
+  <div class="wrap wide">
+    <a class="brand" href="./"><img src="art/icon.png" alt=""><b>Piggy</b></a>
+    <nav class="nav">
+      <a href="learn.html">Learn</a>
+      <a href="https://beginyanarthur.github.io/piggy-privacy/">Privacy</a>
+      <a href="https://beginyanarthur.github.io/piggy-privacy/support.html">Support</a>
+    </nav>
+    <button class="theme" type="button" id="theme" aria-label="Switch to dark">
+      <svg class="ion i-dark" width="22" height="22" viewBox="0 3 24 24" fill="currentColor" aria-hidden="true"><path d="M7.6875 4.6875Q8.25 4.40625 8.578125 4.59375Q8.8125 4.734375 8.953125 4.96875Q9.046875 5.25 8.8125 5.8125Q8.390625 7.078125 8.296875 8.671875Q8.15625 11.296875 9.234375 13.5Q10.640625 16.359375 13.453125 17.765625Q14.53125 18.28125 15.5625 18.515625Q18.515625 19.171875 21.140625 18.1875Q21.75 17.953125 21.984375 18.046875Q22.21875 18.140625 22.3828125 18.375Q22.546875 18.609375 22.5 18.84375Q22.40625 19.21875 21.890625 20.109375Q20.0625 23.25 16.6875 24.65625Q14.625 25.5 12.375 25.5Q10.359375 25.5 8.53125 24.796875Q6.375 24.0 4.6875 22.3125Q3.328125 20.953125 2.578125 19.3125Q1.5 17.0625 1.5 14.625Q1.5 12.375 2.34375 10.3125Q3.09375 8.484375 4.5234375 6.984375Q5.953125 5.484375 7.6875 4.6875ZM6.890625 7.265625Q6.890625 7.265625 6.890625 7.265625Q6.984375 6.890625 6.9609375 6.8671875Q6.9375 6.84375 6.609375 7.078125Q4.359375 8.8125 3.46875 11.625Q2.765625 13.734375 3.09375 15.9375Q3.5625 19.171875 5.9296875 21.421875Q8.296875 23.671875 11.53125 23.953125Q13.078125 24.09375 14.625 23.71875Q17.296875 23.109375 19.265625 21.140625Q20.25 20.15625 20.15625 20.0625Q20.109375 20.015625 19.734375 20.109375Q18.09375 20.34375 16.546875 20.203125Q13.828125 19.921875 11.53125 18.375Q9.234375 16.828125 7.96875 14.390625Q6.984375 12.515625 6.796875 10.453125Q6.65625 8.90625 6.890625 7.265625Z"/></svg>
+      <svg class="ion i-light" width="22" height="22" viewBox="0 3 24 24" fill="currentColor" aria-hidden="true"><path d="M11.625 4.640625Q11.859375 4.453125 12.1640625 4.5234375Q12.46875 4.59375 12.65625 4.875Q12.75 5.015625 12.75 6.28125Q12.75 7.734375 12.5390625 7.9921875Q12.328125 8.25 12.0 8.25Q11.671875 8.25 11.4609375 7.9921875Q11.25 7.734375 11.25 6.28125Q11.25 5.015625 11.34375 4.875Q11.4375 4.734375 11.625 4.640625ZM4.78125 7.453125Q5.109375 7.265625 5.4375 7.453125Q5.625 7.5 6.4921875 8.390625Q7.359375 9.28125 7.40625 9.46875Q7.546875 9.9375 7.1953125 10.2421875Q6.84375 10.546875 6.375 10.359375Q6.1875 10.265625 5.3203125 9.375Q4.453125 8.484375 4.40625 8.34375Q4.21875 7.734375 4.78125 7.453125ZM18.5625 7.453125Q18.9375 7.265625 19.265625 7.453125Q19.59375 7.640625 19.640625 8.015625Q19.640625 8.25 19.5 8.4609375Q19.359375 8.671875 18.65625 9.375Q17.625 10.453125 17.296875 10.453125Q16.96875 10.453125 16.734375 10.21875Q16.453125 9.84375 16.640625 9.421875Q16.6875 9.234375 17.5546875 8.3671875Q18.421875 7.5 18.5625 7.453125ZM11.296875 10.546875Q11.4375 10.546875 12.1171875 10.546875Q12.796875 10.546875 13.171875 10.640625Q14.484375 11.015625 15.421875 12.046875Q16.21875 12.984375 16.453125 14.296875Q16.59375 15.046875 16.40625 15.796875Q16.171875 17.203125 15.1875 18.1875Q14.203125 19.171875 12.796875 19.40625Q12.046875 19.59375 11.296875 19.453125Q9.609375 19.171875 8.5546875 17.90625Q7.5 16.640625 7.5 15.0Q7.5 13.921875 7.96875 13.03125Q9.0 10.96875 11.296875 10.546875ZM12.84375 12.140625Q12.140625 11.90625 11.484375 12.046875Q10.640625 12.1875 10.0078125 12.75Q9.375 13.3125 9.140625 14.15625Q9.046875 14.4375 9.046875 15.0Q9.046875 15.5625 9.140625 15.84375Q9.609375 17.390625 11.15625 17.90625Q12.0 18.140625 12.84375 17.90625Q14.390625 17.390625 14.859375 15.84375Q14.953125 15.5625 14.953125 15.0Q14.953125 14.4375 14.859375 14.15625Q14.390625 12.5625 12.84375 12.140625ZM2.0625 14.25Q2.203125 14.25 3.421875 14.25Q4.453125 14.25 4.6640625 14.296875Q4.875 14.34375 5.0625 14.484375Q5.578125 15.046875 4.96875 15.5625Q4.734375 15.75 3.28125 15.75Q2.015625 15.75 1.875 15.65625Q1.265625 15.28125 1.59375 14.625Q1.734375 14.34375 2.0625 14.25ZM20.71875 14.25H21.9375L22.125 14.34375Q22.5 14.578125 22.5 15.0Q22.5 15.421875 22.125 15.65625Q21.984375 15.75 20.71875 15.75Q19.265625 15.75 19.03125 15.5625Q18.609375 15.1875 18.796875 14.71875Q18.9375 14.34375 19.265625 14.296875Q19.359375 14.25 19.40625 14.25Q19.453125 14.25 20.71875 14.25ZM6.75 19.59375Q7.125 19.59375 7.3359375 19.921875Q7.546875 20.25 7.359375 20.578125Q7.3125 20.765625 6.4453125 21.6328125Q5.578125 22.5 5.4375 22.546875Q5.0625 22.734375 4.734375 22.546875Q4.40625 22.359375 4.359375 21.984375Q4.359375 21.75 4.5 21.5390625Q4.640625 21.328125 5.34375 20.625Q6.234375 19.734375 6.3984375 19.640625Q6.5625 19.546875 6.75 19.59375ZM17.0625 19.59375Q17.296875 19.5 17.625 19.640625Q17.8125 19.734375 18.6796875 20.625Q19.546875 21.515625 19.59375 21.65625Q19.734375 22.125 19.3828125 22.453125Q19.03125 22.78125 18.5625 22.546875Q18.421875 22.5 17.5546875 21.6328125Q16.6875 20.765625 16.640625 20.578125Q16.5 20.296875 16.6171875 20.015625Q16.734375 19.734375 17.0625 19.59375ZM11.71875 21.796875Q11.71875 21.796875 11.71875 21.796875Q12.0 21.703125 12.28125 21.796875Q12.609375 21.9375 12.703125 22.3125Q12.75 22.453125 12.75 23.71875Q12.75 24.984375 12.65625 25.125Q12.421875 25.5 12.0 25.5Q11.578125 25.5 11.34375 25.125Q11.25 24.984375 11.25 23.6953125Q11.25 22.40625 11.296875 22.265625Q11.4375 21.9375 11.71875 21.796875Z"/></svg>
+    </button>
+  </div>
+</div>
+
+<main class="wrap wide">
+  <header class="top">
+    <h1>Budget reviews, one to one</h1>
+    <p class="lede">A video call with me, in Armenian or English. You talk, I listen, and we look at your money together.</p>
+    <div class="actions"><a class="link" href="mailto:beginyan.arthur@gmail.com?subject=Budget%20review%3A%20please%20send%20me%20the%20price&amp;body=Hi%20Artur%2C%0A%0AI%20am%20interested%20in%20a%20budget%20review.%20Please%20send%20me%20the%20price.%0A%0AStart%20or%20check%20up%3A%20%0AArmenian%20or%20English%3A%20%0A"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.52 3.84Q3.8 3.75 11.98 3.75Q20.16 3.75 20.44 3.8Q21.14 3.98 21.68 4.5Q22.22 5.02 22.41 5.72Q22.5 6 22.5 12Q22.5 18 22.41 18.28Q21.98 19.78 20.53 20.16Q20.25 20.25 12 20.25Q3.75 20.25 3.47 20.16Q2.95 20.02 2.48 19.64Q1.83 19.12 1.59 18.28Q1.5 18 1.5 12Q1.5 6 1.59 5.72Q1.73 5.2 2.06 4.78Q2.62 4.03 3.52 3.84ZM20.34 5.34 20.16 5.25H12.09Q4.08 5.25 3.89 5.3Q3.38 5.39 3.09 5.91L3 6.05V12V17.95L3.09 18.09Q3.33 18.47 3.66 18.66L3.84 18.75H12H20.16L20.34 18.66Q20.72 18.47 20.91 18.09L21 17.91V12V6.09L20.91 5.91Q20.72 5.53 20.34 5.34ZM4.92 6.84Q4.92 6.84 4.92 6.84Q5.25 6.66 5.58 6.84Q5.72 6.89 8.86 9.38Q8.86 9.38 12 11.81L15.14 9.38Q18.28 6.89 18.42 6.84Q18.7 6.7 19.01 6.8Q19.31 6.89 19.41 7.17Q19.5 7.31 19.5 7.5Q19.5 7.69 19.43 7.8Q19.36 7.92 19.27 8.06Q19.08 8.2 15.75 10.78Q12.42 13.36 12.33 13.41Q12 13.59 11.67 13.41Q11.58 13.36 8.25 10.78Q4.92 8.2 4.73 8.06Q4.5 7.83 4.5 7.5Q4.5 7.03 4.92 6.84Z"/></svg> <em>I am interested</em> <span>send me the price</span></a></div>
+  </header>
+
+  <section id="offers">
+    <p class="kicker">Two ways in</p>
+    <h2>Start, or check up</h2>
+    <ul class="offers">
+      <li><svg class="ion" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.59 1.52Q19.92 1.52 20.62 1.52Q21.84 1.52 22.17 1.9Q22.36 2.13 22.41 2.6Q22.59 3.4 22.45 4.48Q22.17 6.68 21.02 9.19Q19.88 11.7 18.33 13.57Q17.3 14.84 16.08 15.77L15.8 16.01V16.62Q15.75 17.55 15.52 18.3Q14.81 20.46 12.47 21.63Q10.78 22.48 9.61 22.48Q9.19 22.48 8.86 22.17Q8.53 21.87 8.48 21.4Q8.48 21.26 8.67 19.71L8.81 18.16H8.72Q8.3 18.07 8.04 17.88Q7.78 17.7 7.03 16.95Q6.28 16.2 6.09 15.94Q5.91 15.68 5.86 15.35L5.81 15.12L5.62 15.16Q5.48 15.16 4.08 15.35Q2.48 15.49 2.11 15.35Q1.78 15.16 1.59 14.74Q1.41 14.32 1.78 13.01Q2.34 10.99 3.56 9.77Q5.16 8.18 7.69 8.18H7.97L8.25 7.8Q9.84 5.84 12.23 4.34Q16.03 1.99 19.59 1.52ZM20.95 3.07Q20.91 3.02 20.53 2.98Q18.19 2.93 14.67 4.71Q11.11 6.49 9.14 9.07Q8.86 9.45 8.72 9.59L8.58 9.68L7.64 9.73Q6.56 9.73 6 9.91Q4.17 10.57 3.38 12.96Q3.05 13.85 3.09 13.9Q3.09 13.95 4.71 13.76Q6.33 13.57 6.54 13.57Q6.75 13.57 6.94 13.71Q7.22 13.9 7.27 14.6L7.31 15.12L8.11 15.87L8.86 16.66L9.38 16.71Q9.98 16.76 10.22 16.95Q10.41 17.18 10.41 17.46Q10.41 17.65 10.22 19.27Q10.03 20.88 10.03 20.88Q10.12 20.98 11.16 20.55Q13.73 19.62 14.2 17.46Q14.25 17.18 14.3 16.29Q14.3 15.49 14.37 15.33Q14.44 15.16 14.91 14.84Q16.41 13.66 17.58 12.12Q20.2 8.6 20.86 4.76Q20.95 4.34 20.98 3.73Q21 3.12 20.95 3.07ZM17.86 7.34Q18.19 7.99 18.14 8.7Q18.09 9.63 17.53 10.34Q16.59 11.41 15.23 11.32Q14.2 11.23 13.5 10.52Q12.66 9.63 12.7 8.46Q12.75 7.38 13.45 6.68Q14.16 5.98 15.05 5.86Q15.94 5.74 16.71 6.16Q17.48 6.59 17.86 7.34ZM15.98 7.48Q15.8 7.38 15.47 7.34Q14.86 7.34 14.48 7.76Q14.2 8.09 14.2 8.55Q14.2 9.12 14.62 9.49Q14.95 9.82 15.49 9.8Q16.03 9.77 16.34 9.42Q16.64 9.07 16.64 8.55Q16.64 7.8 15.98 7.48ZM4.64 15.82Q4.64 15.82 4.64 15.82Q5.53 15.59 5.81 16.15Q5.95 16.43 5.81 16.78Q5.67 17.13 5.34 17.18Q4.69 17.32 4.43 17.62Q4.17 17.93 3.98 18.77Q3.75 20.09 3.8 20.18Q3.84 20.18 4.5 20.09Q5.16 19.99 5.48 19.9Q5.86 19.8 6.09 19.66Q6.61 19.43 6.8 18.63Q6.84 18.35 7.17 18.19Q7.5 18.02 7.83 18.16Q8.48 18.49 8.11 19.52Q7.59 20.93 5.77 21.4Q5.06 21.54 4.05 21.66Q3.05 21.77 2.81 21.68Q2.39 21.59 2.3 21.16Q2.2 20.93 2.32 19.85Q2.44 18.77 2.62 18.12Q2.95 16.85 3.61 16.34Q4.08 15.96 4.64 15.82Z"/></svg><b>Start</b><span>You want to begin and do not know where. We set up your bags together, and you leave with a month planned.</span></li>
+      <li><svg class="ion" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.91 1.97Q11.91 1.97 11.91 1.97Q12.09 1.93 12.38 2.07Q12.47 2.12 14.46 4.11Q16.45 6.1 16.48 6.29Q16.5 6.47 16.5 6.52Q16.5 6.57 16.48 6.69Q16.45 6.8 14.44 8.82Q12.42 10.83 12.28 10.93Q12 11.02 11.72 10.93Q11.25 10.74 11.25 10.22Q11.25 9.99 11.48 9.71Q11.72 9.43 12.7 8.44Q13.12 8.02 13.41 7.74Q13.69 7.46 13.83 7.29Q13.97 7.13 13.97 7.13Q13.92 7.08 12.8 7.04Q11.2 7.04 10.36 7.27Q8.67 7.69 7.38 8.91Q6.09 10.13 5.58 11.77Q4.92 13.88 5.58 15.85Q6.28 17.96 8.04 19.25Q9.8 20.54 12 20.54Q14.2 20.54 15.98 19.22Q17.77 17.91 18.42 15.8Q18.66 15.05 18.7 14.16Q18.75 13.6 18.84 13.41Q18.94 13.22 19.22 13.08Q19.5 12.99 19.78 13.08Q20.25 13.32 20.25 13.97Q20.25 15.1 19.83 16.37Q19.22 18.19 17.84 19.58Q16.45 20.96 14.62 21.62Q12 22.46 9.38 21.62Q7.12 20.87 5.62 19.04Q4.12 17.21 3.8 14.87Q3.7 13.83 3.8 12.85Q4.08 10.74 5.27 9.03Q6.47 7.32 8.39 6.38Q9.56 5.82 10.83 5.63Q11.25 5.54 12.33 5.54Q13.41 5.54 13.59 5.58Q13.59 5.58 13.83 5.63L12.56 4.37Q11.58 3.38 11.41 3.15Q11.25 2.91 11.25 2.68Q11.25 2.49 11.41 2.28Q11.58 2.07 11.77 2.02Q11.86 2.02 11.91 1.97Z"/></svg><b>Check up</b><span>You have been budgeting for a while. We look at a month or two together and find what to change.</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <p class="kicker">How it goes</p>
+    <h2>Three steps</h2>
+    <div class="card">
+      <div class="row-i"><span class="num-i">1</span><div><h3>Say you are interested</h3><p>Write to me, say which one you want and in which language, and I send you the price.</p></div></div>
+      <div class="row-i"><span class="num-i">2</span><div><h3>Pick a time</h3><p>If it suits you, you get times to choose from.</p></div></div>
+      <div class="row-i"><span class="num-i">3</span><div><h3>We talk</h3><p>About an hour on a video call. You leave with bags that fit your life, and a plan for the next month.</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="kicker">Before the call</p>
+    <h2>What to have ready</h2>
+    <div class="card">
+      <div class="row-i"><svg class="badge-i" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M1.92 3.05Q2.11 3 12.09 3H22.08L22.36 3.14Q22.88 3.38 23.11 3.89L23.2 4.08V9.75V15.38L23.11 15.66Q22.73 16.36 21.94 16.5Q21.7 16.5 12 16.5Q2.3 16.5 2.06 16.5Q1.22 16.36 0.89 15.61L0.8 15.38V9.75V4.08L0.89 3.89Q1.22 3.19 1.92 3.05ZM4.41 4.55Q4.41 4.5 3.33 4.5H2.25V5.58V6.66L2.39 6.61Q2.86 6.52 3.42 6.05Q3.84 5.72 4.12 5.25Q4.41 4.78 4.41 4.55ZM18.09 4.69V4.5H12H5.91V4.69Q5.81 5.25 5.44 5.91Q4.5 7.64 2.62 8.11L2.25 8.2V9.75V11.3L2.39 11.34Q4.03 11.62 5.06 12.98Q5.77 13.92 5.91 14.81V15H12H18.05L18.09 14.81Q18.19 14.34 18.47 13.73Q19.12 12.42 20.48 11.77Q21.05 11.44 21.61 11.34L21.75 11.3V9.75V8.2L21.38 8.11Q19.5 7.64 18.56 5.91Q18.19 5.25 18.09 4.69ZM21.75 5.58V4.5H20.67Q19.59 4.5 19.59 4.52Q19.59 4.55 19.69 4.78Q19.92 5.53 20.58 6.05Q21.14 6.52 21.61 6.61L21.75 6.66ZM11.58 5.3Q12.89 5.16 13.97 5.72Q14.62 6.05 15.19 6.56Q16.45 7.88 16.48 9.7Q16.5 11.53 15.23 12.84Q13.92 14.25 12 14.25Q10.03 14.25 8.7 12.8Q7.36 11.34 7.55 9.38Q7.59 8.72 7.83 8.11Q8.25 6.94 9.28 6.16Q10.31 5.39 11.58 5.3ZM12.61 6.84Q11.62 6.61 10.73 7.03Q9.14 7.83 9.02 9.56Q8.91 11.3 10.41 12.28Q10.69 12.47 11.06 12.61Q11.44 12.75 12 12.75Q12.56 12.75 12.94 12.61Q14.02 12.23 14.58 11.25Q15.05 10.45 14.98 9.52Q14.91 8.58 14.34 7.88Q13.64 7.03 12.61 6.84ZM2.62 12.98Q2.44 12.89 2.34 12.84H2.25V13.92V15H3.33H4.41V14.91Q4.36 14.77 4.17 14.39Q3.66 13.36 2.62 12.98ZM21.75 13.92Q21.75 13.64 21.75 13.38Q21.75 13.12 21.75 12.98Q21.75 12.84 21.75 12.84Q21.52 12.84 20.95 13.17Q20.72 13.31 20.37 13.66Q20.02 14.02 19.83 14.39Q19.64 14.77 19.59 14.91V15H20.67H21.75ZM2.81 17.3Q2.95 17.25 12 17.25Q21.05 17.25 21.19 17.3Q21.61 17.39 21.73 17.81Q21.84 18.23 21.52 18.52Q21.38 18.66 21.23 18.7Q21.05 18.75 12 18.75Q2.95 18.75 2.77 18.7Q2.39 18.61 2.3 18.19Q2.2 17.91 2.37 17.62Q2.53 17.34 2.81 17.3ZM4.17 19.59Q4.17 19.59 4.17 19.59Q4.31 19.5 12 19.5Q19.69 19.5 19.83 19.59Q20.16 19.73 20.2 20.06Q20.34 20.67 19.83 20.91Q19.83 20.91 19.64 21H12H4.36L4.17 20.91Q3.66 20.67 3.8 20.06Q3.84 19.73 4.17 19.59Z"/></svg><div><h3>For a start</h3><p>A rough idea of what comes in each month, and your biggest costs.</p></div></div>
+      <div class="row-i"><svg class="badge-i" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.73 0.05Q7.97 0 11.98 0Q15.98 0 16.22 0.05Q17.06 0.19 17.7 0.73Q18.33 1.27 18.61 2.06L18.75 2.44V12V21.56L18.61 21.94Q18.47 22.31 18.33 22.55Q17.77 23.44 16.88 23.81Q16.45 23.95 15.87 23.98Q15.28 24 12 24Q8.72 24 8.13 23.98Q7.55 23.95 7.12 23.81Q6.23 23.44 5.67 22.55Q5.39 22.03 5.3 21.47Q5.25 21.19 5.25 12Q5.25 2.81 5.3 2.53Q5.44 1.59 6.14 0.89Q6.84 0.19 7.73 0.05ZM9.09 1.59Q9.09 1.59 9.09 1.59Q9.09 1.5 8.53 1.55Q7.78 1.55 7.45 1.73Q7.08 1.97 6.89 2.39Q6.89 2.39 6.8 2.62V12V21.38L6.89 21.61Q7.22 22.36 8.06 22.5Q8.3 22.5 12 22.5Q15.7 22.5 15.94 22.5Q16.73 22.36 17.11 21.66Q17.11 21.66 17.2 21.38V12V2.62L17.11 2.34Q16.88 1.88 16.36 1.64Q16.17 1.55 15.54 1.52Q14.91 1.5 14.91 1.59Q14.91 1.97 14.3 2.39Q13.92 2.62 12 2.62Q10.17 2.62 9.84 2.48Q9.61 2.34 9.35 2.04Q9.09 1.73 9.09 1.59Z"/></svg><div><h3>For a check up</h3><p>Piggy, or whatever you use now, with a month or two of spending in it.</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="kicker">Answers</p>
+    <h2>Questions</h2>
+    <div class="card">
+      <div class="row-i"><svg class="badge-i" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.81 2.29Q9.28 2.15 9.56 2.52Q9.75 2.71 9.75 3.74V4.49H12.84Q15.98 4.49 16.08 4.59Q16.41 4.73 16.45 5.01Q16.5 5.15 16.5 5.2Q16.59 5.43 16.31 5.76Q16.17 5.9 15.96 5.95Q15.75 5.99 14.86 5.99H13.73L13.5 6.74Q12.33 10.07 10.64 12.46Q10.27 12.98 10.27 13.02Q10.27 13.07 11.09 13.87Q11.91 14.66 12.23 14.95Q12.75 15.41 12.75 15.74Q12.75 16.12 12.47 16.33Q12.19 16.54 11.84 16.47Q11.48 16.4 10.08 14.99L9.28 14.2L9.09 14.38Q8.3 15.27 7.41 16.07Q6.47 16.96 5.37 17.81Q4.27 18.65 3.94 18.7Q3.52 18.84 3.21 18.48Q2.91 18.13 3.05 17.71Q3.14 17.48 3.66 17.15Q5.06 16.26 6.7 14.71Q8.16 13.31 8.25 13.07Q8.3 13.02 7.97 12.6Q7.12 11.52 6.21 10.09Q5.3 8.66 5.25 8.34Q5.2 8.06 5.39 7.77Q5.53 7.59 5.84 7.54Q6.14 7.49 6.38 7.59Q6.56 7.68 7.03 8.52Q7.78 9.84 8.81 11.24L9.28 11.85L9.56 11.38Q10.92 9.32 11.91 6.7Q12.14 6.09 12.14 6.04Q12.14 5.99 7.12 5.99Q2.11 5.99 1.95 5.92Q1.78 5.85 1.69 5.76Q1.41 5.43 1.5 5.2Q1.5 5.15 1.55 5.01Q1.59 4.73 1.92 4.59Q2.02 4.49 5.16 4.49H8.25V3.74Q8.25 2.95 8.3 2.81Q8.39 2.38 8.81 2.29ZM16.92 9.84Q17.16 9.7 17.44 9.77Q17.72 9.84 17.86 10.07Q17.95 10.21 20.2 15.51Q22.08 19.82 22.31 20.45Q22.55 21.09 22.41 21.32Q22.12 21.88 21.56 21.7Q21.33 21.65 21.16 21.39Q21 21.13 20.53 20.06L19.97 18.74H17.25H14.53L14.02 19.96Q13.36 21.46 13.22 21.6Q12.89 21.84 12.56 21.7Q12.33 21.65 12.16 21.41Q12 21.18 12 20.9Q12.05 20.76 14.32 15.41Q16.59 10.07 16.69 9.98Q16.78 9.88 16.92 9.84ZM18.28 14.85Q17.3 12.46 17.25 12.46Q17.16 12.56 16.17 14.88Q15.19 17.2 15.21 17.22Q15.23 17.24 17.25 17.24Q17.25 17.24 19.31 17.2Z"/></svg><div><h3>Which language?</h3><p>Armenian or English, whichever you are more at home in.</p></div></div>
+      <div class="row-i"><svg class="badge-i" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.56 5.3Q3.8 5.25 8.44 5.25H13.08L13.36 5.34Q14.77 5.77 15.42 7.03Q15.66 7.55 15.7 8.02Q15.75 8.48 15.75 11.77Q15.75 15.66 15.7 15.98Q15.56 17.02 14.81 17.81Q14.02 18.56 13.03 18.7Q12.75 18.75 8.25 18.75Q4.5 18.75 3.84 18.73Q3.19 18.7 2.72 18.52Q1.17 17.81 0.84 16.22Q0.75 15.89 0.75 12Q0.75 8.11 0.84 7.78Q1.03 6.89 1.69 6.19Q2.48 5.44 3.56 5.3ZM21.28 6.05Q21.47 6 21.82 6.02Q22.17 6.05 22.45 6.14Q22.88 6.42 23.11 6.89L23.2 7.08V12V16.92L23.11 17.16Q22.59 18.19 21.56 18Q21.33 17.95 21.19 17.91Q21.09 17.86 19.15 16.5Q17.2 15.14 17.02 14.95Q16.59 14.62 16.5 14.06Q16.5 13.83 16.5 12Q16.5 10.17 16.5 9.94Q16.59 9.42 16.92 9.09Q17.11 8.91 19.12 7.5Q21.14 6.09 21.28 6.05ZM13.03 6.84Q12.84 6.75 8.25 6.75Q3.66 6.75 3.42 6.84Q2.44 7.17 2.3 8.2Q2.25 8.44 2.25 12Q2.25 15.56 2.3 15.8Q2.44 16.88 3.47 17.16Q3.66 17.25 8.34 17.25L12.98 17.2L13.27 17.11Q13.83 16.83 14.11 16.27L14.2 15.98L14.25 12.09Q14.25 8.2 14.16 7.97Q14.06 7.55 13.73 7.24Q13.41 6.94 13.03 6.84ZM21.75 12Q21.75 12 21.75 12Q21.75 10.78 21.75 9.75Q21.75 8.72 21.75 8.11Q21.75 7.5 21.75 7.5Q21.7 7.55 19.83 8.81Q19.83 8.81 18 10.12V12V13.88L19.83 15.14L21.7 16.45Q21.75 16.5 21.75 15.91Q21.75 15.33 21.75 14.32Q21.75 13.31 21.75 12Z"/></svg><div><h3>Where does the call happen?</h3><p>On a video call. The link comes with the time you pick.</p></div></div>
+      <div class="row-i"><svg class="badge-i" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.34 3.03Q12.23 2.94 13.31 3.08Q14.67 3.31 15.94 3.92Q18.52 5.14 19.9 7.65Q21.28 10.16 20.95 13.02Q20.67 15.31 19.36 17.19Q18.05 19.06 15.94 20.05Q13.36 21.36 10.52 20.87Q7.69 20.38 5.62 18.31Q4.59 17.28 3.94 15.97Q3 14.1 3 11.99Q3 9.88 3.94 8Q5.3 5.24 8.06 3.92Q9.52 3.22 11.34 3.03ZM13.08 4.58Q12.75 4.53 12.05 4.51Q11.34 4.49 11.02 4.53Q8.48 4.91 6.7 6.69Q4.92 8.47 4.59 10.91Q4.41 11.99 4.59 13.06Q5.02 15.97 7.31 17.82Q9.61 19.67 12.52 19.49Q15 19.3 16.85 17.71Q18.7 16.11 19.31 13.72Q19.64 12.36 19.41 10.91Q19.08 8.47 17.3 6.69Q15.52 4.91 13.08 4.58ZM11.39 6.78Q11.62 6.74 12.23 6.76Q12.84 6.78 13.08 6.83Q14.06 7.11 14.72 7.91Q15.33 8.66 15.28 9.69Q15.23 10.49 14.84 11.07Q14.44 11.66 13.45 12.36Q12.52 13.02 12.42 13.72Q12.38 14.28 12.05 14.42Q11.53 14.71 11.2 14.19Q10.88 13.67 11.39 12.64Q11.77 11.94 12.7 11.24Q13.59 10.63 13.83 10.21Q13.92 9.92 13.92 9.55Q13.92 9.17 13.83 8.99Q13.5 8.33 12.75 8.14Q12.52 8.1 12.12 8.07Q11.72 8.05 11.48 8.1Q10.55 8.28 10.17 9.13Q10.03 9.36 10.03 9.46Q10.03 9.78 9.75 10.02Q9.38 10.3 8.95 9.97Q8.62 9.64 8.81 8.99Q9.05 8.14 9.77 7.53Q10.5 6.92 11.39 6.78ZM11.3 15.46Q11.3 15.46 11.3 15.46Q11.77 15.22 12.23 15.5Q12.61 15.78 12.66 16.21Q12.66 16.63 12.42 16.91Q12.14 17.24 11.72 17.24Q11.34 17.24 11.11 16.96Q10.73 16.63 10.8 16.16Q10.88 15.69 11.3 15.46Z"/></svg><div><h3>Is this financial advice?</h3><p>No. We plan what you spend and what you save. For investments, talk to someone licensed where you live.</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Want one?</h2>
+    <p style="color: var(--ink-dim)">It is an email to me, and I answer with the price. Nothing is booked and nothing is paid until you say yes.</p>
+    <div class="actions"><a class="link" href="mailto:beginyan.arthur@gmail.com?subject=Budget%20review%3A%20please%20send%20me%20the%20price&amp;body=Hi%20Artur%2C%0A%0AI%20am%20interested%20in%20a%20budget%20review.%20Please%20send%20me%20the%20price.%0A%0AStart%20or%20check%20up%3A%20%0AArmenian%20or%20English%3A%20%0A"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.52 3.84Q3.8 3.75 11.98 3.75Q20.16 3.75 20.44 3.8Q21.14 3.98 21.68 4.5Q22.22 5.02 22.41 5.72Q22.5 6 22.5 12Q22.5 18 22.41 18.28Q21.98 19.78 20.53 20.16Q20.25 20.25 12 20.25Q3.75 20.25 3.47 20.16Q2.95 20.02 2.48 19.64Q1.83 19.12 1.59 18.28Q1.5 18 1.5 12Q1.5 6 1.59 5.72Q1.73 5.2 2.06 4.78Q2.62 4.03 3.52 3.84ZM20.34 5.34 20.16 5.25H12.09Q4.08 5.25 3.89 5.3Q3.38 5.39 3.09 5.91L3 6.05V12V17.95L3.09 18.09Q3.33 18.47 3.66 18.66L3.84 18.75H12H20.16L20.34 18.66Q20.72 18.47 20.91 18.09L21 17.91V12V6.09L20.91 5.91Q20.72 5.53 20.34 5.34ZM4.92 6.84Q4.92 6.84 4.92 6.84Q5.25 6.66 5.58 6.84Q5.72 6.89 8.86 9.38Q8.86 9.38 12 11.81L15.14 9.38Q18.28 6.89 18.42 6.84Q18.7 6.7 19.01 6.8Q19.31 6.89 19.41 7.17Q19.5 7.31 19.5 7.5Q19.5 7.69 19.43 7.8Q19.36 7.92 19.27 8.06Q19.08 8.2 15.75 10.78Q12.42 13.36 12.33 13.41Q12 13.59 11.67 13.41Q11.58 13.36 8.25 10.78Q4.92 8.2 4.73 8.06Q4.5 7.83 4.5 7.5Q4.5 7.03 4.92 6.84Z"/></svg> <em>I am interested</em> <span>send me the price</span></a></div>
+  </section>
+
+  <footer>
+    <p><a href="./">Piggy's home page</a> · <a href="learn.html">Learn</a> · <a href="mailto:beginyan.arthur@gmail.com">beginyan.arthur@gmail.com</a></p>
+  </footer>
+</main>
+<script>
+/*
+  Two lines of state: what the system says, and what the reader has said,
+  which the script in the head has already applied.
+  Storage can throw in a private window, so every touch of it is guarded and
+  the page renders correctly when it comes back empty.
+*/
+(function () {
+  var root = document.documentElement;
+  var media = window.matchMedia("(prefers-color-scheme: dark)");
+  function showing() {
+    var set = root.getAttribute("data-theme");
+    return set || (media.matches ? "dark" : "light");
+  }
+  var button = document.getElementById("theme");
+  function label() {
+    button.setAttribute("aria-label", showing() === "dark" ? "Switch to light" : "Switch to dark");
+  }
+  /*
+    The screenshots can follow the theme, so a dark page shows the app in
+    dark. Any image with a data-dark path swaps to it in dark and back to its
+    own src in light; an image without one stays as it is.
+  */
+  function shots() {
+    var dark = showing() === "dark";
+    var imgs = document.querySelectorAll("img[data-dark]");
+    for (var i = 0; i < imgs.length; i++) {
+      var img = imgs[i];
+      if (!img.getAttribute("data-light")) img.setAttribute("data-light", img.getAttribute("src"));
+      var want = img.getAttribute(dark ? "data-dark" : "data-light");
+      if (img.getAttribute("src") !== want) img.setAttribute("src", want);
+    }
+  }
+  function sync() { label(); shots(); }
+  sync();
+  button.addEventListener("click", function () {
+    var next = showing() === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("piggy-theme", next); } catch (e) {}
+    sync();
+  });
+  // Until they press it, the page still follows the system as it changes.
+  media.addEventListener("change", function () { if (!root.getAttribute("data-theme")) sync(); });
+})();
+</script>
+</body>
+</html>
