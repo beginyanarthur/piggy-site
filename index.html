@@ -678,7 +678,10 @@
   .stage-grid { display: grid; grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr); gap: calc(var(--s-xxl) + var(--s-lg)); align-items: center; width: 100%; }
   .stage-text { display: flex; flex-direction: column; gap: var(--s-lg); position: relative; z-index: 2; }
   .stage h1 { font-size: clamp(38px, 4.4vw, 58px); line-height: 1.05; letter-spacing: -0.02em; color: var(--stage-ink); text-wrap: balance; }
-  .stage-lede { font-size: clamp(var(--t-h3), 2vw, 22px); line-height: 1.45; color: var(--stage-dim); max-width: 24em; }
+  /* Each sentence starts its own line, and each is balanced, so no word is
+     left alone at the end. */
+  .stage-lede > span { display: block; text-wrap: balance; }
+  .stage-lede { font-size: clamp(var(--t-h3), 2vw, 22px); line-height: 1.45; color: var(--stage-dim); max-width: 26em; text-wrap: balance; }
   .stage-lede b { color: var(--stage-pink); font-weight: 600; }
   .stage-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-md); margin-top: var(--s-sm); }
 
@@ -858,7 +861,7 @@
   <div class="wrap wide stage-grid">
     <div class="stage-text">
       <h1>Budgeting is not only about counting money</h1>
-      <p class="stage-lede">It is about the life you want. When your money has a plan, your mind has room for everything else.</p>
+      <p class="stage-lede"><span>It is about the life you want.</span> <span>When your money has a plan, your mind has room for everything else.</span></p>
       <div class="stage-actions">
         <span class="store" role="img" aria-label="Coming soon to the App Store">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6.2" y="2.4" width="11.6" height="19.2" rx="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M10.6 5.5h2.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
