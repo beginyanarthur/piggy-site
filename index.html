@@ -54,6 +54,7 @@
     --income: #0A6A3B;      /* income */
     --pink-soft: #D42D971A; /* pigPink at a fill's weight, as incomeSoft is */
     --pink-ink: #A82278;    /* pigPinkDark: pink for words and small marks, 5.5:1 on the page */
+    --card-raised: #FFFFFF; /* a card lifted off a card-coloured band; surfaceAlt in dark */
     --pink-strong: #A82278; /* pigPinkDark, a solid button pressed or hovered */
     --on-pink: #FFFFFF;     /* textInverse, words on a pink fill */
     --overlay: #1B1E3859;   /* overlay, the app's scrim; here the shadow under a card you can click */
@@ -79,7 +80,7 @@
       --card: #3A4066;
       --line: #FFFFFF24; --line-strong: #FFFFFF73;
       --ink: #FFFFFF; --ink-dim: #FFFFFFCC; --ink-muted: #FFFFFFA6;
-      --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-ink: #FF9AD5; --pink-strong: #D6389C; --on-pink: #1B1E38; --overlay: #0E1024BF;
+      --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-ink: #FF9AD5; --card-raised: #454C79; --pink-strong: #D6389C; --on-pink: #1B1E38; --overlay: #0E1024BF;
     }
   }
   :root[data-theme="dark"] {
@@ -87,7 +88,7 @@
     --card: #3A4066;
     --line: #FFFFFF24; --line-strong: #FFFFFF73;
     --ink: #FFFFFF; --ink-dim: #FFFFFFCC; --ink-muted: #FFFFFFA6;
-    --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-ink: #FF9AD5; --pink-strong: #D6389C; --on-pink: #1B1E38; --overlay: #0E1024BF;
+    --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-ink: #FF9AD5; --card-raised: #454C79; --pink-strong: #D6389C; --on-pink: #1B1E38; --overlay: #0E1024BF;
   }
 
   * { box-sizing: border-box; }
@@ -466,8 +467,11 @@
     border: 1px solid transparent; background: transparent;
     transition: background-color 250ms ease-out, box-shadow 250ms ease-out, border-color 250ms ease-out, transform 250ms ease-out;
   }
+  /* Chosen, the card is raised off the band it sits on: white on white is
+     told apart by its edge and shadow, and in dark it takes the app's raised
+     surface, a step lighter than the band. */
   .ot.on {
-    background: var(--card); border-color: var(--line-strong);
+    background: var(--card-raised); border-color: var(--line-strong);
     box-shadow: 0 18px 40px -20px var(--overlay), 0 2px 8px -4px var(--overlay);
     transform: translateY(-2px);
   }
@@ -555,6 +559,18 @@
     .ot-col, .ot-col.left, .ot-col.right { padding: 0; text-align: center; align-items: center; gap: 0; }
     :root.js .ot:not(.on) { display: none; }
     .ot { width: 100%; max-width: 34em; }
+    .orbit { max-width: 100%; }
+    .ot, .ot.on { padding: var(--s-md) var(--s-lg); }
+  }
+  /* On a phone the row of numbers must fit in the column: smaller circles,
+     tighter gaps, arrows a step smaller, every target still 36px or more. */
+  @media (max-width: 560px) {
+    .ot-mid { gap: var(--s-lg); }
+    .stepper { gap: 6px; margin-bottom: var(--s-md); }
+    .dots { gap: 6px; }
+    .dot { width: 40px; height: 40px; font-size: var(--t-body-app); }
+    .arrow { width: 36px; height: 36px; }
+    .ot .od > p, .ot.on .od > p { padding-left: 0; }
   }
   @media (prefers-reduced-motion: reduce) {
     .od, .ot-b, .dot, .phone-col { transition: none; }
@@ -683,15 +699,6 @@
   /* The phones take the larger share of the stage: they are the picture. */
   .stage-grid { display: grid; grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr); gap: calc(var(--s-xxl) + var(--s-lg)); align-items: center; width: 100%; }
   .stage-text { display: flex; flex-direction: column; gap: var(--s-lg); position: relative; z-index: 2; }
-  /* A soft shade of the stage's own navy behind the words, so the wave dims
-     as it passes under them and every line keeps its contrast (WCAG 1.4.3),
-     while it stays bright everywhere else. */
-  .stage-text::before {
-    content: ""; position: absolute; z-index: -1; pointer-events: none;
-    inset: -90px -140px -150px -200px;
-    background: radial-gradient(closest-side, var(--stage-bottom) 55%, transparent);
-    opacity: .92;
-  }
   .stage h1 { font-size: clamp(38px, 4.4vw, 58px); line-height: 1.05; letter-spacing: -0.02em; color: var(--stage-ink); text-wrap: balance; }
   .stage-lede { font-size: clamp(var(--t-h3), 2vw, 22px); line-height: 1.45; color: var(--stage-dim); max-width: 24em; }
   .stage-lede b { color: var(--stage-pink); font-weight: 600; }
@@ -772,7 +779,12 @@
     so the haze and the ribbon travel together as one current. Only transforms change, so it is smooth. It runs
     clear to both edges of the screen, and stands still under reduced motion.
   */
+  /* The wave fades out behind the column of words, so every line sits on the
+     stage's plain navy and keeps its contrast (WCAG 1.4.3), and comes back
+     beside them: at the far left on a wide screen, and all across the right. */
   .waves {
+    -webkit-mask-image: linear-gradient(90deg, #000 max(0px, calc(50% - 680px)), transparent max(0px, calc(50% - 600px)), transparent calc(50% - 110px), #000 calc(50% + 70px));
+            mask-image: linear-gradient(90deg, #000 max(0px, calc(50% - 680px)), transparent max(0px, calc(50% - 600px)), transparent calc(50% - 110px), #000 calc(50% + 70px));
     position: absolute; left: 0; right: 0; top: 18%; height: 78%; z-index: -1; overflow: hidden; pointer-events: none;
   }
   /* The tile keeps its own width, 4000, wider than any screen so the eye never
@@ -784,7 +796,7 @@
   .wv.near { background-image: url("art/wave-near.webp"); animation: flow 600s linear infinite reverse; }
   @keyframes flow { from { transform: translateX(0); } to { transform: translateX(-4000px); } }
   /* Stacked, the ribbons run behind the phone, not behind the words. */
-  @media (max-width: 880px) { .waves { top: auto; bottom: 4%; height: 420px; } }
+  @media (max-width: 880px) { .waves { top: auto; bottom: 4%; height: 420px; -webkit-mask-image: none; mask-image: none; } }
   @media (prefers-reduced-motion: reduce) { .wv { animation: none; } }
 
   /*
