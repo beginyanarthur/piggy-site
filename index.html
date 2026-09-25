@@ -437,36 +437,125 @@
   .closing > p { max-width: 34em; }
   .closing .actions { justify-content: center; }
 
-  /* ---------- The month, one step at a time ----------
-     The steps run down the left and the phone stands on the right. The
-     chosen step opens in place, so its sentence sits under its own title
-     and not in a separate block across the page. */
-  .month { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: var(--s-xxl); align-items: center; max-width: 920px; }
-  .steps { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
-  .step { border-top: 1px solid var(--line); }
-  .step:last-child { border-bottom: 1px solid var(--line); }
-  .step-b {
-    display: flex; align-items: center; gap: var(--s-md); width: 100%; min-height: 60px;
-    padding: var(--s-sm) 0; cursor: pointer; text-align: left;
-    background: none; border: 0; font: 600 var(--t-h3)/1.3 var(--font); color: var(--ink-dim);
-    transition: color 150ms ease-out;
+  /* ---------- The month, as a little map ----------
+     The phone stands in the middle with the five numbers under it; the
+     step titles sit around it, one, three and five on the left, two and
+     four on the right, at their own heights. Choosing a number draws a pink
+     thread from it out to its title, which lights up and opens to its
+     sentence while the phone shows that step's screen. */
+  .orbit {
+    position: relative; display: grid; align-items: start;
+    grid-template-columns: minmax(0, 1fr) 340px minmax(0, 1fr); column-gap: calc(var(--s-xxl) * 2);
+    max-width: 1200px; margin: var(--s-xxl) auto var(--s-lg);
   }
-  .step-b:hover { color: var(--ink); }
-  .step-b .step-no { flex: none; transition: background-color 150ms ease-out, color 150ms ease-out; }
-  .step.on .step-b { color: var(--ink); font-size: var(--t-h2); }
-  .step.on .step-no { background: var(--pink); color: var(--on-pink); border-color: var(--pink); }
-  .step-d { padding: 0 0 var(--s-lg) 44px; display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-sm); }
-  .step-d p { color: var(--ink-dim); max-width: 32em; }
-  :root.js .step:not(.on) .step-d { display: none; }
-  .next { min-height: 44px; padding: 0; border: 0; background: none; color: var(--pink); font: 600 var(--t-body-app) var(--font); cursor: pointer; }
-  :root:not(.js) .next { display: none; }
-  .phone-col { position: sticky; top: 90px; }
-  .phone-col .shot { width: 100%; height: auto; display: block; }
+  .thread { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 0; }
+  .thread-p { fill: none; stroke: var(--pink); stroke-width: 3; stroke-linecap: round; filter: drop-shadow(0 0 6px #F45FC066); }
+  .thread-end { fill: var(--pink); filter: drop-shadow(0 0 6px #F45FC099); transition: opacity 200ms ease-out; }
+  .ot-col { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--s-xxl); }
+  /* Both columns read the same way: cards hug the phone side, text always
+     starts on the left, the number always first. */
+  .ot-col.left { align-items: flex-end; padding-top: var(--s-md); }
+  .ot-col.right { align-items: flex-start; padding-top: calc(var(--s-xxl) * 2); }
+  /* Each step is a card of one width. Resting, it has no fill, so nothing
+     jumps; chosen, it lifts: white, a soft shadow, as a card you can click. */
+  .ot {
+    width: 340px; max-width: 100%; text-align: left;
+    padding: var(--s-lg) var(--s-xl); border-radius: var(--r-xl);
+    border: 1px solid transparent; background: transparent;
+    transition: background-color 250ms ease-out, box-shadow 250ms ease-out, border-color 250ms ease-out, transform 250ms ease-out;
+  }
+  .ot.on {
+    background: var(--card); border-color: var(--line);
+    box-shadow: 0 18px 40px -20px var(--overlay), 0 2px 8px -4px var(--overlay);
+    transform: translateY(-2px);
+  }
+  .ot-b {
+    display: flex; align-items: center; gap: var(--s-md); padding: 0; min-height: 44px; width: 100%; text-align: left;
+    background: none; border: 0; cursor: pointer; font: 600 var(--t-h3)/1.3 var(--font); color: var(--ink-muted);
+    transition: color 200ms ease-out, transform 200ms ease-out;
+  }
+  .ot-b:hover { color: var(--ink); }
+  .ot-n {
+    flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
+    font-size: var(--t-body-app); font-weight: 700; color: var(--pink); background: var(--pink-soft);
+    transition: background-color 250ms ease-out, color 250ms ease-out;
+  }
+  .ot.on .ot-b { color: var(--ink); font-size: var(--t-h2); }
+  .ot.on .ot-n { background: var(--pink); color: var(--on-pink); }
+  /* The sentence opens under its title: the grid row grows from nothing. */
+  .od { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 400ms cubic-bezier(.2,.8,.2,1), opacity 300ms ease-out; }
+  .od > p { overflow: hidden; margin: 0; color: var(--ink-dim); font-size: 17px; line-height: 1.6; }
+  .ot.on .od { grid-template-rows: 1fr; opacity: 1; transition-delay: 150ms; }
+  .ot.on .od > p { padding: var(--s-md) 0 0 calc(32px + var(--s-md)); }
+  .ot-mid { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: var(--s-xxl); }
+  /* The phone keeps one size for every step, so the numbers and arrows under
+     it never move: the screenshots differ a little in shape, and each now
+     sits inside the same frame instead of setting the height itself. The
+     columns start at the top for the same reason, so an opening card never
+     re-centres the row. */
+  /* The same answer to the pointer as the hero's phones: the steady stage is
+     measured, the phone inside turns toward the pointer and floats forward
+     with its shadow deepening. Mouse only; still under reduced motion. */
+  .phone-stage { width: 100%; perspective: 1200px; }
+  .mb-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+  /* The back of the phone, seen for the middle half of a turn: navy like the
+     app, a camera bump, and Piggy's snout in the middle. Drawn inside the
+     same frame the screenshots use. */
+  .phone-back {
+    position: absolute; inset: 1.4% 2.6%; border-radius: 13% / 6.4%; display: none;
+    background: radial-gradient(120% 70% at 30% 20%, #4A5186, #2E3358 55%, #1B1E38);
+    box-shadow: inset 0 0 0 3px #454C79, inset 0 0 0 5px #1B1E38;
+  }
+  .phone-back.on { display: grid; place-items: center; }
+  .phone-back img { width: 22%; height: auto; opacity: .95; }
+  .phone-back .cam {
+    position: absolute; left: 8%; top: 4.5%; width: 34%; aspect-ratio: 1; border-radius: 26%;
+    background: #232743; box-shadow: inset 0 0 0 2px #454C79;
+  }
+  .phone-col {
+    width: 100%; aspect-ratio: 1003 / 2000; position: relative;
+    transform: rotateX(var(--rx, 0deg)) rotateY(calc(var(--ry, 0deg) + var(--flip, 0deg))) translateZ(var(--z, 0px)) scale(var(--flip-s, 1));
+    transition: transform 220ms cubic-bezier(.2,.8,.2,1), filter 300ms ease-out;
+    filter: drop-shadow(0 20px 30px #1B1E3824);
+  }
+  .phone-stage.live .phone-col { filter: drop-shadow(0 34px 44px #1B1E383D); }
+  .phone-stage:not(.live) .phone-col { transition-duration: 600ms; }
+  .phone-col .shot { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
   :root.js .phone-col .shot:not(.on) { display: none; }
   :root:not(.js) .phone-col .shot + .shot { display: none; }
-  @media (max-width: 720px) {
-    .month { grid-template-columns: 1fr; gap: var(--s-lg); }
-    .phone-col { position: static; order: -1; justify-self: center; width: 220px; }
+  /* Previous and next sit either side of the numbers: quieter than them,
+     outline only, and gone at the ends where there is nowhere to go. */
+  .stepper { display: flex; align-items: center; gap: var(--s-sm); margin-bottom: var(--s-xl); }
+  .dots { display: flex; gap: 12px; }
+  .arrow {
+    display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;
+    background: transparent; color: var(--ink-dim); border: 1px solid var(--line);
+    transition: color 200ms ease-out, border-color 200ms ease-out, opacity 200ms ease-out;
+  }
+  .arrow:hover:not(:disabled) { color: var(--pink); border-color: var(--pink); }
+  .arrow:disabled { opacity: .3; cursor: default; }
+  .dot {
+    width: 52px; height: 52px; border-radius: 50%; cursor: pointer;
+    font: 700 var(--t-h3) var(--font); font-variant-numeric: tabular-nums;
+    color: var(--ink-dim); background: var(--card); border: 1px solid var(--line-strong);
+    box-shadow: 0 6px 16px -10px var(--overlay);
+    transition: background-color 200ms ease-out, color 200ms ease-out, border-color 200ms ease-out, transform 200ms ease-out;
+  }
+  .dot:hover { border-color: var(--pink); color: var(--ink); transform: translateY(-2px); }
+  .dot.on { background: var(--pink); border-color: var(--pink); color: var(--on-pink); }
+  :root:not(.js) .ot .od { grid-template-rows: 1fr; opacity: 1; }
+  @media (max-width: 980px) {
+    .orbit { grid-template-columns: 1fr; row-gap: var(--s-lg); max-width: 420px; }
+    .thread { display: none; }
+    .ot-mid { order: -1; }
+    .phone-stage { max-width: 240px; }
+    /* Stacked, only the chosen step shows, under the numbers. */
+    .ot-col, .ot-col.left, .ot-col.right { padding: 0; text-align: center; align-items: center; gap: 0; }
+    :root.js .ot:not(.on) { display: none; }
+    .ot { width: 100%; max-width: 34em; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .od, .ot-b, .dot, .phone-col { transition: none; }
   }
 
   /* ---------- Which one are you ---------- */
@@ -792,51 +881,60 @@
 
   <section id="how">
     <h2>What does a month look like?</h2>
-    <p class="lead-in">Five steps, every month. Tap one to see it.</p>
-    <div class="month">
-      <ol class="steps">
-        <li class="step on">
-          <button class="step-b" type="button" id="st-1" aria-expanded="true" aria-controls="sd-1"><span class="step-no">1</span><span class="step-t">Money comes in</span></button>
-          <div class="step-d" id="sd-1">
-            <p>Your salary, a side job, a gift. Add it, and Piggy holds it until you say where it goes.</p>
-            <button class="next" type="button" data-next="2">Next ›</button>
+    <p class="lead-in">Five steps, every month. Tap a number to follow the path.</p>
+    <div class="orbit">
+      <svg class="thread" aria-hidden="true"><path class="thread-p" d=""/><circle class="thread-end" r="6" cx="-20" cy="-20"/></svg>
+      <div class="ot-col left">
+        <div class="ot on" data-step="1">
+          <button class="ot-b" type="button" aria-controls="od-1" aria-expanded="true"><span class="ot-n">1</span><span class="ot-t">Money comes in</span></button>
+          <div class="od" id="od-1"><p>Your salary, a side job, a gift. Add it, and Piggy holds it until you say where it goes.</p></div>
+        </div>
+        <div class="ot" data-step="3">
+          <button class="ot-b" type="button" aria-controls="od-3" aria-expanded="false"><span class="ot-n">3</span><span class="ot-t">You spend from a bag</span></button>
+          <div class="od" id="od-3"><p>Tap the button, pick the bag, type the amount. Each bag shows what is left while you choose, so you know before you spend and not after.</p></div>
+        </div>
+        <div class="ot" data-step="5">
+          <button class="ot-b" type="button" aria-controls="od-5" aria-expanded="false"><span class="ot-n">5</span><span class="ot-t">You plan the next month</span></button>
+          <div class="od" id="od-5"><p>Most months look like the one before. Copy the last one or start from scratch, then change what needs changing. More here, less there, and it starts again.</p></div>
+        </div>
+      </div>
+      <div class="ot-mid">
+        <svg class="mb-defs" width="0" height="0" aria-hidden="true" focusable="false">
+          <filter id="mb-a" x="-30%" y="0" width="160%" height="100%"><feGaussianBlur stdDeviation="6 0"/></filter>
+          <filter id="mb-b" x="-40%" y="0" width="180%" height="100%"><feGaussianBlur stdDeviation="16 0"/></filter>
+          <filter id="mb-c" x="-50%" y="0" width="200%" height="100%"><feGaussianBlur stdDeviation="28 0"/></filter>
+        </svg>
+        <div class="phone-stage">
+          <div class="phone-col" aria-live="polite">
+          <div class="phone-back" aria-hidden="true"><span class="cam"></span><img src="art/mark.png" alt="" width="56" height="56"></div>
+          <img class="shot on" data-step="1" src="art/income.webp" alt="Add income: 750,000 dram typed in, a field for where it came from, and the date" width="1003" height="2000">
+          <img class="shot" data-step="2" src="art/bags.webp" alt="The bags list with Rent, Food and Transport lifted out: each shows its amount and how much of it is spent" width="1074" height="2000" loading="lazy">
+          <img class="shot" data-step="3" src="art/spend.webp" alt="The log a spend sheet: bags grouped into essentials, everyday, saving for and owing, each showing what is left in it" width="1073" height="2000" loading="lazy">
+          <img class="shot" data-step="4" src="art/check.webp" alt="The money check: what your bags hold, with a button to count what you really have" width="1003" height="2000" loading="lazy">
+          <img class="shot" data-step="5" src="art/plan.webp" alt="Start planning October: copy September's bags and amounts, or start from scratch" width="1003" height="2000" loading="lazy">
           </div>
-        </li>
-        <li class="step">
-          <button class="step-b" type="button" id="st-2" aria-expanded="false" aria-controls="sd-2"><span class="step-no">2</span><span class="step-t">You give each bag its share</span></button>
-          <div class="step-d" id="sd-2">
-            <p>Share what came in between your bags until nothing is left to allocate. If something you need has no bag yet, a trip, a laptop, a rainy day, make one on the way and give it what you can.</p>
-            <button class="next" type="button" data-next="3">Next ›</button>
+        </div>
+        <div class="stepper">
+          <button class="arrow prev" type="button" aria-label="Previous step"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.09 4.16Q15.09 4.16 15.09 4.16Q15.42 4.07 15.8 4.23Q16.17 4.4 16.36 4.72Q16.64 5.24 16.36 5.76Q16.31 5.9 13.27 8.94Q13.27 8.94 10.22 11.99L13.27 15.04Q16.31 18.08 16.36 18.22Q16.55 18.55 16.45 18.93Q16.41 19.35 16.05 19.63Q15.7 19.91 15.28 19.87Q14.95 19.82 14.48 19.4Q14.02 18.97 11.2 16.16Q8.34 13.3 7.92 12.83Q7.5 12.37 7.5 11.99Q7.5 11.62 7.9 11.17Q8.3 10.72 11.11 7.91Q14.48 4.49 14.7 4.35Q14.91 4.21 15.09 4.16Z"/></svg></button>
+          <div class="dots" role="group" aria-label="The five steps of a month">
+          <button class="dot on" type="button" data-step="1" aria-pressed="true" aria-label="Step 1: Money comes in">1</button>
+          <button class="dot" type="button" data-step="2" aria-pressed="false" aria-label="Step 2: You give each bag its share">2</button>
+          <button class="dot" type="button" data-step="3" aria-pressed="false" aria-label="Step 3: You spend from a bag">3</button>
+          <button class="dot" type="button" data-step="4" aria-pressed="false" aria-label="Step 4: You check the real money">4</button>
+          <button class="dot" type="button" data-step="5" aria-pressed="false" aria-label="Step 5: You plan the next month">5</button>
           </div>
-        </li>
-        <li class="step">
-          <button class="step-b" type="button" id="st-3" aria-expanded="false" aria-controls="sd-3"><span class="step-no">3</span><span class="step-t">You spend from a bag</span></button>
-          <div class="step-d" id="sd-3">
-            <p>Tap the button, pick the bag, type the amount. Each bag shows what is left while you choose, so you know before you spend and not after.</p>
-            <button class="next" type="button" data-next="4">Next ›</button>
-          </div>
-        </li>
-        <li class="step">
-          <button class="step-b" type="button" id="st-4" aria-expanded="false" aria-controls="sd-4"><span class="step-no">4</span><span class="step-t">You check the real money</span></button>
-          <div class="step-d" id="sd-4">
-            <p>Does Piggy match the money you really have? Count your cash and cards to find out. If the two do not agree, Piggy helps you fix the difference.</p>
-            <button class="next" type="button" data-next="5">Next ›</button>
-          </div>
-        </li>
-        <li class="step">
-          <button class="step-b" type="button" id="st-5" aria-expanded="false" aria-controls="sd-5"><span class="step-no">5</span><span class="step-t">You plan the next month</span></button>
-          <div class="step-d" id="sd-5">
-            <p>Most months look like the one before. Copy the last one or start from scratch, then change what needs changing. More here, less there, and it starts again.</p>
-            <button class="next" type="button" data-next="1">Back to the start ›</button>
-          </div>
-        </li>
-      </ol>
-      <div class="phone-col" aria-live="polite">
-        <img class="shot on" data-step="1" src="art/income.webp" alt="Add income: 750,000 dram typed in, a field for where it came from, and the date" width="1003" height="2000">
-        <img class="shot" data-step="2" src="art/bags.webp" alt="The bags list with Rent, Food and Transport lifted out: each shows its amount and how much of it is spent" width="1074" height="2000" loading="lazy">
-        <img class="shot" data-step="3" src="art/spend.webp" alt="The log a spend sheet: bags grouped into essentials, everyday, saving for and owing, each showing what is left in it" width="1073" height="2000" loading="lazy">
-        <img class="shot" data-step="4" src="art/check.webp" alt="The money check: what your bags hold, with a button to count what you really have" width="1003" height="2000" loading="lazy">
-        <img class="shot" data-step="5" src="art/plan.webp" alt="Start planning October: copy September's bags and amounts, or start from scratch" width="1003" height="2000" loading="lazy">
+          <button class="arrow next" type="button" aria-label="Next step"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.39 4.16Q8.39 4.16 8.39 4.16Q8.77 4.07 9.14 4.25Q9.28 4.3 12.8 7.82Q15.7 10.68 16.1 11.15Q16.5 11.61 16.5 11.99Q16.5 12.36 16.1 12.83Q15.7 13.3 12.8 16.16Q9.98 18.97 9.52 19.4Q9.05 19.82 8.72 19.86Q8.3 19.91 7.95 19.63Q7.59 19.35 7.55 18.93Q7.45 18.55 7.64 18.22Q7.69 18.08 10.73 15.04Q10.73 15.04 13.78 11.99L10.73 8.94Q7.69 5.9 7.64 5.75Q7.45 5.43 7.55 5.05Q7.64 4.3 8.39 4.16Z"/></svg></button>
+        </div>
+      </div>
+      <div class="ot-col right">
+        <div class="ot" data-step="2">
+          <button class="ot-b" type="button" aria-controls="od-2" aria-expanded="false"><span class="ot-n">2</span><span class="ot-t">You give each bag its share</span></button>
+          <div class="od" id="od-2"><p>Share what came in between your bags until nothing is left to allocate. If something you need has no bag yet, a trip, a laptop, a rainy day, make one on the way and give it what you can.</p></div>
+        </div>
+        <div class="ot" data-step="4">
+          <button class="ot-b" type="button" aria-controls="od-4" aria-expanded="false"><span class="ot-n">4</span><span class="ot-t">You check the real money</span></button>
+          <div class="od" id="od-4"><p>Does Piggy match the money you really have? Count your cash and cards to find out. If the two do not agree, Piggy helps you fix the difference.</p></div>
+        </div>
       </div>
     </div>
   </section>
@@ -979,32 +1077,154 @@
 })();
 </script>
 <script>
-  // The month: one step open at a time, its screen on the phone beside it.
+  // The month as a map: a number or a title chooses the step; a pink thread
+  // is drawn from the number out to the title, which opens to its sentence.
   (function () {
-    var steps = [].slice.call(document.querySelectorAll(".step"));
-    if (!steps.length) return;
-    var shots = [].slice.call(document.querySelectorAll(".phone-col .shot"));
-    function show(n, focus) {
-      steps.forEach(function (st, i) {
-        var on = i === n - 1;
-        st.classList.toggle("on", on);
-        var b = st.querySelector(".step-b");
-        b.setAttribute("aria-expanded", on ? "true" : "false");
-        if (on && focus) b.focus({ preventScroll: true });
-      });
-      shots.forEach(function (im) { im.classList.toggle("on", im.getAttribute("data-step") === String(n)); });
+    var orbit = document.querySelector(".orbit");
+    if (!orbit) return;
+    var dots = [].slice.call(orbit.querySelectorAll(".dot"));
+    var items = [].slice.call(orbit.querySelectorAll(".ot"));
+    var shots = [].slice.call(orbit.querySelectorAll(".phone-col .shot"));
+    var path = orbit.querySelector(".thread-p"), end = orbit.querySelector(".thread-end");
+    var still = window.matchMedia("(prefers-reduced-motion: reduce)");
+    var current = 1;
+    var prev = orbit.querySelector(".arrow.prev"), next = orbit.querySelector(".arrow.next");
+    function item(n) { return items.filter(function (i) { return i.getAttribute("data-step") === String(n); })[0]; }
+    function route(n) {
+      var o = orbit.getBoundingClientRect();
+      var d = dots[n - 1].getBoundingClientRect();
+      var ph = orbit.querySelector(".phone-col").getBoundingClientRect();
+      var t = item(n).getBoundingClientRect(), tb = item(n).querySelector(".ot-b").getBoundingClientRect();
+      var left = item(n).parentNode.classList.contains("left");
+      // Down out of the number, along under the row, up the lane beside the
+      // phone and into the title: it never crosses another number or the phone.
+      var x0 = d.left + d.width / 2 - o.left, y0 = d.bottom - o.top;
+      var below = y0 + 30;
+      var x1 = (left ? t.right + 8 : t.left - 8) - o.left, y1 = tb.top + tb.height / 2 - o.top;
+      var edge = (left ? ph.left : ph.right) - o.left;
+      // The lane runs between the button row and the card, clear of both.
+      var st = orbit.querySelector(".stepper").getBoundingClientRect();
+      var stEdge = (left ? st.left : st.right) - o.left;
+      var lane = left ? Math.min((edge + x1) / 2, stEdge - 18) : Math.max((edge + x1) / 2, stEdge + 18);
+      var r = 22, sx = left ? -1 : 1;
+      var dp = "M" + x0 + " " + y0 +
+        " L" + x0 + " " + (below - r) +
+        " Q" + x0 + " " + below + " " + (x0 + sx * r) + " " + below +
+        " L" + (lane - sx * r) + " " + below +
+        " Q" + lane + " " + below + " " + lane + " " + (below - r) +
+        " L" + lane + " " + (y1 + r) +
+        " Q" + lane + " " + y1 + " " + (lane + sx * r) + " " + y1 +
+        " L" + x1 + " " + y1;
+      return { d: dp, x: x1, y: y1 };
     }
-    steps.forEach(function (st, i) {
-      var b = st.querySelector(".step-b");
-      b.addEventListener("click", function () { show(i + 1); });
-      b.addEventListener("keydown", function (e) {
-        if (e.key === "ArrowDown") { e.preventDefault(); show((i + 1) % steps.length + 1, true); }
-        if (e.key === "ArrowUp") { e.preventDefault(); show((i + steps.length - 1) % steps.length + 1, true); }
+    function draw(animate) {
+      if (getComputedStyle(path.parentNode).display === "none") return;
+      var r = route(current);
+      path.setAttribute("d", r.d);
+      var len = path.getTotalLength();
+      path.style.transition = "none";
+      path.style.strokeDasharray = len;
+      end.setAttribute("cx", r.x); end.setAttribute("cy", r.y);
+      if (!animate || still.matches) { path.style.strokeDashoffset = 0; end.style.opacity = 1; return; }
+      path.style.strokeDashoffset = len; end.style.opacity = 0;
+      path.getBoundingClientRect();
+      path.style.transition = "stroke-dashoffset 800ms cubic-bezier(.45,0,.2,1)";
+      path.style.strokeDashoffset = 0;
+      setTimeout(function () { end.style.opacity = 1; }, 720);
+    }
+    // Changing step moves the phone a little, forward one way and back the
+    // other, while the new screen comes in. Instant under reduced motion.
+    var phone = orbit.querySelector(".phone-col");
+    function swap(n) { shots.forEach(function (im) { im.classList.toggle("on", im.getAttribute("data-step") === String(n)); }); }
+    // Changing step spins the phone one full turn, straight away, like a real
+    // phone: the old screen turns away, its back comes round, and the new
+    // screen turns in, each change made exactly edge on so it is never seen.
+    // A sideways motion blur shows the speed and fades as it lands. Forward spins one way, back the other.
+    var pending = 0, pending2 = 0, SH = "drop-shadow(0 20px 30px #1B1E3824)";
+    var back = orbit.querySelector(".phone-back");
+    function turn(n, dir) {
+      if (still.matches || !phone.animate) { swap(n); return; }
+      cancelAnimationFrame(pending); clearTimeout(pending2);
+      phone.getAnimations().forEach(function (a) { a.cancel(); });
+      back.classList.remove("on");
+      var d = dir, len = 620, a = .2, b = .58;   // edge on at 90 and 270 degrees
+      phone.animate([
+        { transform: "rotateY(0deg)", easing: "cubic-bezier(.3,.3,.8,.9)" },
+        { transform: "rotateY(" + (d * 90) + "deg) scale(.96)", offset: a, easing: "linear" },
+        { transform: "rotateY(" + (d * 270) + "deg) scale(.96)", offset: b, easing: "cubic-bezier(.15,.6,.3,1)" },
+        { transform: "rotateY(" + (d * 360) + "deg)" }
+      ], { duration: len, composite: "add" });
+      phone.animate([
+        { filter: SH },
+        { filter: "url(#mb-a) " + SH, offset: .1 },
+        { filter: "url(#mb-b) " + SH, offset: .25 },
+        { filter: "url(#mb-c) " + SH, offset: .4 },
+        { filter: "url(#mb-b) " + SH, offset: .6 },
+        { filter: "url(#mb-a) " + SH, offset: .75 },
+        { filter: SH, offset: .88 }, { filter: SH }
+      ], { duration: len });
+      // Watch the real angle each frame: the face changes the moment the phone
+      // passes edge on (its cosine changes sign), first to its back, then to
+      // the new screen. A timer as a backstop, if frames stop coming.
+      var crossings = 0, last = 1, done = false;
+      function face(k) {
+        if (k === 1) { shots.forEach(function (im) { im.classList.remove("on"); }); back.classList.add("on"); }
+        else { back.classList.remove("on"); swap(n); done = true; }
+      }
+      function watch() {
+        if (done) return;
+        var c = new DOMMatrix(getComputedStyle(phone).transform).m11;
+        if ((c < 0) !== (last < 0)) { crossings++; face(crossings); }
+        last = c;
+        if (!done) pending = requestAnimationFrame(watch);
+      }
+      pending = requestAnimationFrame(watch);
+      pending2 = setTimeout(function () { if (!done) { crossings = 2; face(2); } }, len + 50);
+    }
+    function show(n, focusDot) {
+      var dir = n >= current ? 1 : -1;
+      if (n === current) { dir = 0; }
+      current = n;
+      dots.forEach(function (d, i) { var on = i === n - 1; d.classList.toggle("on", on); d.setAttribute("aria-pressed", on ? "true" : "false"); if (on && focusDot) d.focus(); });
+      items.forEach(function (it) {
+        var on = it.getAttribute("data-step") === String(n);
+        it.classList.toggle("on", on);
+        it.querySelector(".ot-b").setAttribute("aria-expanded", on ? "true" : "false");
+      });
+      if (dir) turn(n, dir); else swap(n);
+      prev.disabled = n === 1; next.disabled = n === 5;
+      // Draw once the opening title has settled, so the thread ends at it.
+      requestAnimationFrame(function () { draw(true); });
+    }
+    // The opening title moves its neighbours; once it has settled, the thread
+    // follows it to where it now is, smoothly, without drawing again.
+    items.forEach(function (it) {
+      it.querySelector(".od").addEventListener("transitionend", function (e) {
+        if (e.propertyName !== "grid-template-rows" || !it.classList.contains("on")) return;
+        var r = route(current);
+        path.style.transition = "none";
+        path.setAttribute("d", r.d);
+        var len = path.getTotalLength();
+        path.style.strokeDasharray = len; path.style.strokeDashoffset = 0;
+        end.setAttribute("cx", r.x); end.setAttribute("cy", r.y);
       });
     });
-    [].forEach.call(document.querySelectorAll(".step .next"), function (b) {
-      b.addEventListener("click", function () { show(Number(b.getAttribute("data-next")), true); });
+    dots.forEach(function (d, i) {
+      d.addEventListener("click", function () { show(i + 1); });
+      d.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight") { e.preventDefault(); show(i % 5 + 2 > 5 ? 1 : i + 2, true); }
+        if (e.key === "ArrowLeft") { e.preventDefault(); show(i === 0 ? 5 : i, true); }
+      });
     });
+    prev.addEventListener("click", function () { if (current > 1) show(current - 1); });
+    next.addEventListener("click", function () { if (current < 5) show(current + 1); });
+    prev.disabled = true;
+    items.forEach(function (it) {
+      it.querySelector(".ot-b").addEventListener("click", function () { show(Number(it.getAttribute("data-step"))); });
+    });
+    var t; window.addEventListener("resize", function () { clearTimeout(t); t = setTimeout(function () { draw(false); }, 100); });
+    window.addEventListener("load", function () { draw(false); });
+    draw(false);
   })();
 
   // Which one are you: the choice rewrites the button and the email.
@@ -1101,6 +1321,39 @@
     });
     window.addEventListener("resize", function () {
       size(); if (!inside) { var r = rest(); tgx = r.x; tgy = r.y; go(); }
+    });
+  })();
+</script>
+<script>
+  // The month's phone answers the pointer as the hero's do.
+  (function () {
+    var stage = document.querySelector(".phone-stage");
+    if (!stage) return;
+    var phone = stage.querySelector(".phone-col");
+    var still = window.matchMedia("(prefers-reduced-motion: reduce)");
+    var fine = window.matchMedia("(hover: hover) and (pointer: fine)");
+    var frame = 0, px = 0, py = 0;
+    function paint() {
+      frame = 0;
+      var r = stage.getBoundingClientRect();
+      var x = Math.max(-0.5, Math.min(0.5, (px - r.left) / r.width - 0.5));
+      var y = Math.max(-0.5, Math.min(0.5, (py - r.top) / r.height - 0.5));
+      phone.style.setProperty("--ry", (x * 16).toFixed(2) + "deg");
+      phone.style.setProperty("--rx", (-y * 10).toFixed(2) + "deg");
+    }
+    stage.addEventListener("pointerenter", function (e) {
+      if (still.matches || !fine.matches || e.pointerType !== "mouse") return;
+      stage.classList.add("live"); phone.style.setProperty("--z", "40px");
+    });
+    stage.addEventListener("pointermove", function (e) {
+      if (!stage.classList.contains("live")) return;
+      px = e.clientX; py = e.clientY;
+      if (!frame) frame = requestAnimationFrame(paint);
+    });
+    stage.addEventListener("pointerleave", function () {
+      if (frame) { cancelAnimationFrame(frame); frame = 0; }
+      stage.classList.remove("live");
+      ["--rx", "--ry", "--z"].forEach(function (v) { phone.style.removeProperty(v); });
     });
   })();
 </script>
