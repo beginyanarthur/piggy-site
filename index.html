@@ -551,7 +551,7 @@
     background: var(--terrain) center / cover no-repeat;
     -webkit-mask-image: radial-gradient(ellipse 85% 80% at 60% 50%, #000 45%, transparent 95%);
             mask-image: radial-gradient(ellipse 85% 80% at 60% 50%, #000 45%, transparent 95%);
-    transition: transform 400ms cubic-bezier(.2,.8,.2,1); will-change: transform;
+    will-change: transform;
   }
   /*
     Everything that answers the pointer only moves: nothing is repainted.
@@ -565,18 +565,27 @@
     border-radius: 50%; overflow: hidden; opacity: 0; pointer-events: none;
     -webkit-mask-image: radial-gradient(closest-side, #000 40%, transparent);
             mask-image: radial-gradient(closest-side, #000 40%, transparent);
-    transition: opacity 300ms ease-out; will-change: transform, opacity;
+    transition: opacity 450ms ease-out; will-change: transform, opacity;
   }
   .spot-in { position: absolute; left: 0; top: 0; background: var(--terrain-lit) center / cover no-repeat; will-change: transform; }
   .stage.live .spot { opacity: 1; }
-  /* While the pointer is over the stage the terrain follows it directly, so the
-     lit window never lags the ridges; the easing is only for settling back. */
-  .stage.live .pattern { transition: none; }
+  /* The ridges drift slowly on their own, a slow wander of the ground, on
+     the separate translate property so the hover drift still adds to it.
+     The lit copy wanders with them, so the pink stays on the ridges. The
+     terrain is 48px larger than the stage on every side, so the wander of
+     at most 30px, plus the hover's 12, never shows an edge. */
+  .pattern, .spot-in { animation: wander 90s ease-in-out infinite; }
+  @keyframes wander {
+    0%, 100% { translate: 0 0; }
+    25% { translate: -30px 8px; }
+    50% { translate: -12px -10px; }
+    75% { translate: 22px 6px; }
+  }
   .glow {
     position: absolute; left: 0; top: 0; width: 1040px; height: 1040px; z-index: -1; pointer-events: none;
     background: radial-gradient(closest-side, #F45FC038, #5B8DEF1F 64%, transparent);
-    opacity: .55; transform: translate3d(calc(72vw - 520px), -120px, 0);
-    transition: opacity 400ms ease-out; will-change: transform;
+    opacity: .55;
+    transition: opacity 500ms ease-out; will-change: transform;
   }
   .stage.live .glow { opacity: 1; }
 
@@ -651,27 +660,28 @@
   @media (prefers-reduced-motion: reduce) {
     .pattern, .rig-in, .rig img { transition: none; }
     .spot, .glow { display: none; }
+    .pattern, .spot-in { animation: none; }
   }
 
 
   /*
     Piggy's wave, abstract: hazy ribbons of pink and purple flowing across
-    the stage behind the phones, as in the brand's films. Two layers, each a
-    strip twice the stage wide of a tile that repeats without a seam, slide
-    left at different speeds, so the ribbons seem to flow and fold rather
-    than move as one. Only transforms change, so it is smooth. It runs
+    the stage behind the phones, as in the brand's films. Two layers of a
+    tile that repeats without a seam drift the same way at the same speed,
+    so the haze and the ribbon travel together as one current. Only transforms change, so it is smooth. It runs
     clear to both edges of the screen, and stands still under reduced motion.
   */
   .waves {
     position: absolute; left: 0; right: 0; top: 18%; height: 78%; z-index: -1; overflow: hidden; pointer-events: none;
   }
-  /* The tile keeps its own width, 1600, at every screen size, so a phone sees
+  /* The tile keeps its own width, 4000, wider than any screen so the eye never
+     sees a repeat, at every screen size, so a phone sees
      the same gentle ribbons as a desktop. The strip is the stage plus two
      tiles wide, so however far it has slid, the screen is always covered. */
-  .wv { position: absolute; top: 0; left: 0; height: 100%; width: calc(100% + 3200px); background-repeat: repeat-x; background-size: 1600px 100%; will-change: transform; }
-  .wv.far { background-image: url("art/wave-far.webp"); animation: flow 320s linear infinite; opacity: .9; }
-  .wv.near { background-image: url("art/wave-near.webp"); animation: flow 200s linear infinite reverse; }
-  @keyframes flow { from { transform: translateX(0); } to { transform: translateX(-1600px); } }
+  .wv { position: absolute; top: 0; left: 0; height: 100%; width: calc(100% + 8000px); background-repeat: repeat-x; background-size: 4000px 100%; will-change: transform; }
+  .wv.far { background-image: url("art/wave-far.webp"); animation: flow 600s linear infinite reverse; opacity: .9; }
+  .wv.near { background-image: url("art/wave-near.webp"); animation: flow 600s linear infinite reverse; }
+  @keyframes flow { from { transform: translateX(0); } to { transform: translateX(-4000px); } }
   /* Stacked, the ribbons run behind the phone, not behind the words. */
   @media (max-width: 880px) { .waves { top: auto; bottom: 4%; height: 420px; } }
   @media (prefers-reduced-motion: reduce) { .wv { animation: none; } }
@@ -972,8 +982,10 @@
 </script>
 <script>
   // The stage answers the pointer by moving layers, never by repainting
-  // them: the phones turn, the terrain drifts, the pink window and the
-  // glow follow. Once a frame, and only while a mouse is over it.
+  // them. One loop eases every layer toward where the pointer says it should
+  // be, in and out alike, so nothing jumps when the mouse arrives or leaves:
+  // the terrain drift, the lit window lined up with it, and the glow. The
+  // phones ease on their own through CSS.
   (function () {
     var stage = document.querySelector(".stage");
     if (!stage) return;
@@ -983,41 +995,62 @@
     var glow = stage.querySelector(".glow");
     var still = window.matchMedia("(prefers-reduced-motion: reduce)");
     var fine = window.matchMedia("(hover: hover) and (pointer: fine)");
-    var frame = 0, px = 0, py = 0, W = 0, H = 0, R = 220;
+    var R = 220, frame = 0, inside = false;
+    var lx = 0, ly = 0;                       // pointer, in stage coordinates
+    var dx = 0, dy = 0, tdx = 0, tdy = 0;     // terrain drift, now and wanted
+    var gx = 0, gy = 0, tgx = 0, tgy = 0;     // glow centre, now and wanted
+    function rest() { return { x: 0.72 * window.innerWidth, y: 400 }; }
     function size() {
-      W = stage.clientWidth; H = stage.clientHeight;
-      spotIn.style.width = (W + 96) + "px"; spotIn.style.height = (H + 96) + "px";
+      spotIn.style.width = (stage.clientWidth + 96) + "px";
+      spotIn.style.height = (stage.clientHeight + 96) + "px";
     }
-    function paint() {
-      frame = 0;
-      var r = stage.getBoundingClientRect();
-      var lx = px - r.left, ly = py - r.top;
-      var x = lx / r.width - 0.5, y = ly / r.height - 0.5;
-      var dx = -x * 24, dy = -y * 24;
-      rig.style.setProperty("--ry", (x * 14).toFixed(2) + "deg");
-      rig.style.setProperty("--rx", (-y * 8).toFixed(2) + "deg");
-      ground.style.transform = "translate3d(" + dx.toFixed(1) + "px," + dy.toFixed(1) + "px,0)";
+    function draw() {
+      ground.style.transform = "translate3d(" + dx.toFixed(2) + "px," + dy.toFixed(2) + "px,0)";
       var sx = lx - R, sy = ly - R;
       spot.style.transform = "translate3d(" + sx + "px," + sy + "px,0)";
-      spotIn.style.transform = "translate3d(" + (-48 - sx + dx).toFixed(1) + "px," + (-48 - sy + dy).toFixed(1) + "px,0)";
-      glow.style.transform = "translate3d(" + (lx - 520) + "px," + (ly - 520) + "px,0)";
+      spotIn.style.transform = "translate3d(" + (-48 - sx + dx).toFixed(2) + "px," + (-48 - sy + dy).toFixed(2) + "px,0)";
+      glow.style.transform = "translate3d(" + (gx - 520).toFixed(1) + "px," + (gy - 520).toFixed(1) + "px,0)";
     }
+    function tick() {
+      frame = 0;
+      var k = 0.09;                           // share of the way each frame
+      dx += (tdx - dx) * k; dy += (tdy - dy) * k;
+      gx += (tgx - gx) * k; gy += (tgy - gy) * k;
+      draw();
+      var moving = Math.abs(tdx - dx) > 0.05 || Math.abs(tdy - dy) > 0.05 ||
+                   Math.abs(tgx - gx) > 0.3 || Math.abs(tgy - gy) > 0.3;
+      if (moving) frame = requestAnimationFrame(tick);
+    }
+    function go() { if (!frame) frame = requestAnimationFrame(tick); }
+    function aim(e) {
+      var r = stage.getBoundingClientRect();
+      lx = e.clientX - r.left; ly = e.clientY - r.top;
+      var x = lx / r.width - 0.5, y = ly / r.height - 0.5;
+      tdx = -x * 24; tdy = -y * 24; tgx = lx; tgy = ly;
+      rig.style.setProperty("--ry", (x * 14).toFixed(2) + "deg");
+      rig.style.setProperty("--rx", (-y * 8).toFixed(2) + "deg");
+    }
+    var r0 = rest(); gx = tgx = r0.x; gy = tgy = r0.y; draw();
     stage.addEventListener("pointerenter", function (e) {
       if (still.matches || !fine.matches || e.pointerType !== "mouse") return;
-      size(); stage.classList.add("live");
+      inside = true; size(); aim(e);
+      // Place the lit window under the pointer before it starts to fade in.
+      draw(); stage.classList.add("live"); go();
     });
     stage.addEventListener("pointermove", function (e) {
-      if (still.matches || !fine.matches || e.pointerType !== "mouse") return;
-      px = e.clientX; py = e.clientY;
-      if (!frame) frame = requestAnimationFrame(paint);
+      if (!inside) return;
+      aim(e); draw(); go();
     });
     stage.addEventListener("pointerleave", function () {
-      if (frame) { cancelAnimationFrame(frame); frame = 0; }
+      if (!inside) return;
+      inside = false;
       stage.classList.remove("live");
       rig.style.removeProperty("--ry"); rig.style.removeProperty("--rx");
-      ground.style.transform = ""; glow.style.transform = "";
+      var r = rest(); tdx = 0; tdy = 0; tgx = r.x; tgy = r.y; go();
     });
-    window.addEventListener("resize", size);
+    window.addEventListener("resize", function () {
+      size(); if (!inside) { var r = rest(); tgx = r.x; tgy = r.y; go(); }
+    });
   })();
 </script>
 </body>
