@@ -118,7 +118,8 @@
   }
   .site .wrap { display: flex; align-items: center; gap: var(--s-md); padding-block: 10px; }
   .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); margin-right: auto; }
-  .brand img { width: 28px; height: 28px; border-radius: var(--s-sm); display: block; }
+  /* The snout on its own, as Piggy's mark is drawn: no tile behind it. */
+  .brand img { width: 30px; height: 30px; display: block; }
   .brand b { font-size: var(--t-h3); font-weight: 700; letter-spacing: 0.2px; }
   .nav { display: flex; gap: var(--s-sm); }
   /* The padding is the tap target: 15px of text is a 20px line, and a thumb
@@ -270,7 +271,7 @@
 
 <div class="site">
   <div class="wrap wide">
-    <a class="brand" href="./"><img src="art/icon.png" alt=""><b>Piggy</b></a>
+    <a class="brand" href="./"><img src="art/mark.png" alt=""><b>Piggy</b></a>
     <nav class="nav">
       <a href="learn.html">Learn</a>
       <a href="reviews.html" aria-current="page">Reviews</a>
