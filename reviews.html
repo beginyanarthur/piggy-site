@@ -52,6 +52,7 @@
     --pink: #D42D97;        /* pigPink */
     --income: #0A6A3B;      /* income */
     --pink-soft: #D42D971A; /* pigPink at a fill's weight, as incomeSoft is */
+    --pink-ink: #A82278;    /* pigPinkDark: pink for words and small marks, 5.5:1 on the page */
     --pink-strong: #A82278; /* pigPinkDark, a solid button pressed or hovered */
     --on-pink: #FFFFFF;     /* textInverse, words on a pink fill */
 
@@ -76,7 +77,7 @@
       --card: #3A4066;
       --line: #FFFFFF24; --line-strong: #FFFFFF73;
       --ink: #FFFFFF; --ink-dim: #FFFFFFCC; --ink-muted: #FFFFFFA6;
-      --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-strong: #D6389C; --on-pink: #1B1E38;
+      --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-ink: #FF9AD5; --pink-strong: #D6389C; --on-pink: #1B1E38;
     }
   }
   :root[data-theme="dark"] {
@@ -84,13 +85,14 @@
     --card: #3A4066;
     --line: #FFFFFF24; --line-strong: #FFFFFF73;
     --ink: #FFFFFF; --ink-dim: #FFFFFFCC; --ink-muted: #FFFFFFA6;
-    --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-strong: #D6389C; --on-pink: #1B1E38;
+    --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-ink: #FF9AD5; --pink-strong: #D6389C; --on-pink: #1B1E38;
   }
 
   * { box-sizing: border-box; }
   /* Money lines up in the app and it lines up here. */
   .num { font-variant-numeric: tabular-nums; }
-  html { -webkit-text-size-adjust: 100%; }
+  /* The sticky header never hides what the keyboard lands on (WCAG 2.4.11). */
+  html { -webkit-text-size-adjust: 100%; scroll-padding-top: 88px; }
   body {
     margin: 0;
     /*
@@ -152,7 +154,7 @@
     background: var(--card); color: var(--ink-dim); cursor: pointer;
     transition: color 150ms ease-out, border-color 150ms ease-out;
   }
-  .theme:hover { color: var(--ink); border-color: var(--pink); }
+  .theme:hover { color: var(--ink); border-color: var(--pink-ink); }
   .theme .i-light { display: none; }
   .theme .i-dark { display: block; }
   :root[data-theme="dark"] .theme .i-light { display: block; }
@@ -171,7 +173,7 @@
   p { margin: 0; }
   /* Pink is what the app makes tappable: "Add a bag", "Plan October". There
      is no teal in Piggy, so there is none here. */
-  a { color: var(--pink); }
+  a { color: var(--pink-ink); }
 
   main.wrap.wide > * { max-width: 720px; }
   .nav a[aria-current="page"] { color: var(--ink); font-weight: 600; }
@@ -204,11 +206,11 @@
 
   section { padding-block: var(--s-xl); display: flex; flex-direction: column; gap: var(--s-md); }
   section > .kicker + h2 { margin-top: calc(var(--s-sm) * -1); }
-  .card { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--card); overflow: hidden; }
+  .card { border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--card); overflow: hidden; }
 
   /* The two offers, the same size side by side: neither is the upsell. */
   .offers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-md); margin: 0; padding: 0; list-style: none; }
-  .offers li { display: flex; flex-direction: column; gap: var(--s-sm); padding: var(--s-md) var(--s-md) var(--s-lg); background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); }
+  .offers li { display: flex; flex-direction: column; gap: var(--s-sm); padding: var(--s-md) var(--s-md) var(--s-lg); background: var(--card); border: 1px solid var(--line-strong); border-radius: var(--r-md); }
   .offers b { font-size: var(--t-h3); font-weight: 600; color: var(--ink); }
   .offers span { font-size: var(--t-body-app); color: var(--ink-dim); }
   @media (max-width: 560px) { .offers { grid-template-columns: 1fr; } }
@@ -219,9 +221,9 @@
   .row-i > div { display: flex; flex-direction: column; gap: var(--s-xs); padding-top: 2px; }
   .row-i h3 { margin: 0; font-size: 17px; font-weight: 600; line-height: 1.4; color: var(--ink); }
   .row-i p { color: var(--ink-dim); }
-  .badge-i, .offers .ion { width: 40px; height: 40px; padding: 9px; border-radius: var(--r-md); background: var(--pink-soft); color: var(--pink); flex: none; }
+  .badge-i, .offers .ion { width: 40px; height: 40px; padding: 9px; border-radius: var(--r-md); background: var(--pink-soft); color: var(--pink-ink); flex: none; }
   /* A step's number sits in the badge, since the order is the point. */
-  .num-i { display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--r-md); background: var(--pink-soft); color: var(--pink); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .num-i { display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--r-md); background: var(--pink-soft); color: var(--pink-ink); font-weight: 700; font-variant-numeric: tabular-nums; }
 
   .actions { display: flex; flex-wrap: wrap; gap: 12px; }
   .link {
@@ -230,12 +232,12 @@
     padding: 10px 18px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: var(--t-body-app);
     transition: border-color 150ms ease-out;
   }
-  .link:hover { border-color: var(--pink); }
+  .link:hover { border-color: var(--pink-ink); }
   .link em, .link span { white-space: nowrap; }
   .link em { font-style: normal; }
   .link span { color: var(--ink-dim); font-weight: 400; }
   .quiet-note { align-self: center; color: var(--ink-dim); font-size: var(--t-body-app); }
-  .link svg { width: 18px; height: 18px; color: var(--pink); flex: none; }
+  .link svg { width: 18px; height: 18px; color: var(--pink-ink); flex: none; }
 
   /*
     The one solid button, the app's `solid` variant: accent fill, inverse

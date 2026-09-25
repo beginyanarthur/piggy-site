@@ -53,6 +53,7 @@
     --pink: #D42D97;        /* pigPink */
     --income: #0A6A3B;      /* income */
     --pink-soft: #D42D971A; /* pigPink at a fill's weight, as incomeSoft is */
+    --pink-ink: #A82278;    /* pigPinkDark: pink for words and small marks, 5.5:1 on the page */
     --pink-strong: #A82278; /* pigPinkDark, a solid button pressed or hovered */
     --on-pink: #FFFFFF;     /* textInverse, words on a pink fill */
     --overlay: #1B1E3859;   /* overlay, the app's scrim; here the shadow under a card you can click */
@@ -78,7 +79,7 @@
       --card: #3A4066;
       --line: #FFFFFF24; --line-strong: #FFFFFF73;
       --ink: #FFFFFF; --ink-dim: #FFFFFFCC; --ink-muted: #FFFFFFA6;
-      --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-strong: #D6389C; --on-pink: #1B1E38; --overlay: #0E1024BF;
+      --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-ink: #FF9AD5; --pink-strong: #D6389C; --on-pink: #1B1E38; --overlay: #0E1024BF;
     }
   }
   :root[data-theme="dark"] {
@@ -86,13 +87,14 @@
     --card: #3A4066;
     --line: #FFFFFF24; --line-strong: #FFFFFF73;
     --ink: #FFFFFF; --ink-dim: #FFFFFFCC; --ink-muted: #FFFFFFA6;
-    --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-strong: #D6389C; --on-pink: #1B1E38; --overlay: #0E1024BF;
+    --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-ink: #FF9AD5; --pink-strong: #D6389C; --on-pink: #1B1E38; --overlay: #0E1024BF;
   }
 
   * { box-sizing: border-box; }
   /* Money lines up in the app and it lines up here. */
   .num { font-variant-numeric: tabular-nums; }
-  html { -webkit-text-size-adjust: 100%; }
+  /* The sticky header never hides what the keyboard lands on (WCAG 2.4.11). */
+  html { -webkit-text-size-adjust: 100%; scroll-padding-top: 88px; }
   body {
     margin: 0;
     /*
@@ -156,7 +158,7 @@
     background: var(--card); color: var(--ink-dim); cursor: pointer;
     transition: color 150ms ease-out, border-color 150ms ease-out;
   }
-  .theme:hover { color: var(--ink); border-color: var(--pink); }
+  .theme:hover { color: var(--ink); border-color: var(--pink-ink); }
   .theme .i-light { display: none; }
   .theme .i-dark { display: block; }
   :root[data-theme="dark"] .theme .i-light { display: block; }
@@ -175,7 +177,7 @@
   p { margin: 0; }
   /* Pink is what the app makes tappable: "Add a bag", "Plan October". There
      is no teal in Piggy, so there is none here. */
-  a { color: var(--pink); }
+  a { color: var(--pink-ink); }
 
 
   /*
@@ -203,7 +205,7 @@
     padding: 10px 18px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: var(--t-body-app);
     transition: border-color 150ms ease-out;
   }
-  .link:hover { border-color: var(--pink); }
+  .link:hover { border-color: var(--pink-ink); }
   /* Each part stays whole: on a phone the pill was breaking "Follow on
      Telegram" across two lines while its note sat alone on the right. */
   .link em, .link span { white-space: nowrap; }
@@ -271,7 +273,7 @@
   .does li {
     display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-sm);
     padding: var(--s-md) var(--s-md) var(--s-lg);
-    background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md);
+    background: var(--card); border: 1px solid var(--line-strong); border-radius: var(--r-md);
   }
   .does b { font-size: var(--t-h3); font-weight: 600; color: var(--ink); }
   .does span { font-size: var(--t-body-app); color: var(--ink-dim); }
@@ -279,7 +281,7 @@
   .does .ion {
     width: 40px; height: 40px; padding: 9px; box-sizing: border-box;
     border: 0; border-radius: var(--r-md);
-    background: var(--pink-soft); color: var(--pink);
+    background: var(--pink-soft); color: var(--pink-ink);
     margin-bottom: var(--s-xs);
   }
   /* Eight cards, four to a row: the top row sets the bags up, the bottom
@@ -316,7 +318,7 @@
   .row .said p { color: var(--ink-dim); }
   .step-no {
     flex: none;
-    font-size: var(--t-caption); font-weight: 600; color: var(--pink);
+    font-size: var(--t-caption); font-weight: 600; color: var(--pink-ink);
     border: 1px solid var(--line-strong); border-radius: var(--r-pill);
     width: 28px; height: 28px; display: grid; place-items: center;
   }
@@ -338,7 +340,7 @@
      section, and a picture beside them only halved the line length. */
   .privacy > div { display: flex; flex-direction: column; gap: var(--s-md); max-width: 760px; }
 
-  .facts { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--card); overflow: hidden; }
+  .facts { border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--card); overflow: hidden; }
   .fact { display: grid; grid-template-columns: 170px 1fr; gap: var(--s-md); padding: 14px 18px; border-bottom: 1px solid var(--line); margin: 0; }
   .fact:last-child { border-bottom: 0; }
   .fact dt { font-weight: 600; color: var(--ink); }
@@ -408,7 +410,7 @@
   .feature {
     display: flex; flex-direction: column; gap: var(--s-lg);
     max-width: 760px; padding: var(--s-xl);
-    background: var(--card); border: 1px solid var(--line); border-radius: var(--r-xl);
+    background: var(--card); border: 1px solid var(--line-strong); border-radius: var(--r-xl);
   }
   .feature h2 { font-size: clamp(var(--t-h1), 4.4vw, var(--t-amount)); line-height: 1.15; margin: 0; }
   .feature .lead-in { color: var(--ink-dim); }
@@ -418,7 +420,7 @@
   .minis li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: var(--s-md); align-items: start; padding: var(--s-md); border: 1px solid var(--line); border-radius: var(--r-md); }
   .minis li > span { display: flex; flex-direction: column; gap: var(--s-xs); font-size: var(--t-body-app); color: var(--ink-dim); }
   .minis b { font-size: var(--t-h3); color: var(--ink); }
-  .minis .ion { width: 40px; height: 40px; padding: 9px; border-radius: var(--r-md); background: var(--pink-soft); color: var(--pink); }
+  .minis .ion { width: 40px; height: 40px; padding: 9px; border-radius: var(--r-md); background: var(--pink-soft); color: var(--pink-ink); }
   .feature .actions { gap: var(--s-md); align-items: center; }
   .quiet-link { color: var(--ink-dim); font-weight: 600; font-size: var(--t-body-app); }
   @media (max-width: 560px) {
@@ -465,7 +467,7 @@
     transition: background-color 250ms ease-out, box-shadow 250ms ease-out, border-color 250ms ease-out, transform 250ms ease-out;
   }
   .ot.on {
-    background: var(--card); border-color: var(--line);
+    background: var(--card); border-color: var(--line-strong);
     box-shadow: 0 18px 40px -20px var(--overlay), 0 2px 8px -4px var(--overlay);
     transform: translateY(-2px);
   }
@@ -477,7 +479,7 @@
   .ot-b:hover { color: var(--ink); }
   .ot-n {
     flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
-    font-size: var(--t-body-app); font-weight: 700; color: var(--pink); background: var(--pink-soft);
+    font-size: var(--t-body-app); font-weight: 700; color: var(--pink-ink); background: var(--pink-soft);
     transition: background-color 250ms ease-out, color 250ms ease-out;
   }
   .ot.on .ot-b { color: var(--ink); font-size: var(--t-h2); }
@@ -532,7 +534,7 @@
     background: transparent; color: var(--ink-dim); border: 1px solid var(--line);
     transition: color 200ms ease-out, border-color 200ms ease-out, opacity 200ms ease-out;
   }
-  .arrow:hover:not(:disabled) { color: var(--pink); border-color: var(--pink); }
+  .arrow:hover:not(:disabled) { color: var(--pink-ink); border-color: var(--pink-ink); }
   .arrow:disabled { opacity: .3; cursor: default; }
   .dot {
     width: 52px; height: 52px; border-radius: 50%; cursor: pointer;
@@ -541,8 +543,8 @@
     box-shadow: 0 6px 16px -10px var(--overlay);
     transition: background-color 200ms ease-out, color 200ms ease-out, border-color 200ms ease-out, transform 200ms ease-out;
   }
-  .dot:hover { border-color: var(--pink); color: var(--ink); transform: translateY(-2px); }
-  .dot.on { background: var(--pink); border-color: var(--pink); color: var(--on-pink); }
+  .dot:hover { border-color: var(--pink-ink); color: var(--ink); transform: translateY(-2px); }
+  .dot.on { background: var(--pink); border-color: var(--pink-ink); color: var(--on-pink); }
   :root:not(.js) .ot .od { grid-template-rows: 1fr; opacity: 1; }
   @media (max-width: 980px) {
     .orbit { grid-template-columns: 1fr; row-gap: var(--s-lg); max-width: 420px; }
@@ -568,7 +570,7 @@
   }
   .pick > span { display: flex; flex-direction: column; gap: var(--s-xs); }
   .pick b { font-size: var(--t-h3); font-weight: 600; color: var(--ink); }
-  .pick .ion { width: 40px; height: 40px; padding: 9px; border-radius: var(--r-md); background: var(--pink-soft); color: var(--pink); }
+  .pick .ion { width: 40px; height: 40px; padding: 9px; border-radius: var(--r-md); background: var(--pink-soft); color: var(--pink-ink); }
   /* Clickable, so it floats: the soft resting shadow the Learn cards wear,
      a lift on hover, and pressed flat again. Cards that only inform, like
      What Piggy does, stay flat on the page. */
@@ -576,7 +578,7 @@
     box-shadow: 0 10px 24px -16px var(--overlay), 0 1px 3px -1px var(--overlay);
     transition: border-color 150ms ease-out, background-color 150ms ease-out, transform 150ms ease-out, box-shadow 150ms ease-out;
   }
-  .pick:hover { border-color: var(--pink); transform: translateY(-3px); box-shadow: 0 18px 36px -18px var(--overlay), 0 2px 6px -3px var(--overlay); }
+  .pick:hover { border-color: var(--pink-ink); transform: translateY(-3px); box-shadow: 0 18px 36px -18px var(--overlay), 0 2px 6px -3px var(--overlay); }
   .pick:active { transform: translateY(0); box-shadow: 0 1px 3px -1px var(--overlay); }
   @media (prefers-reduced-motion: reduce) { .pick:hover { transform: none; } }
   /* Chosen: a 2px pink edge on the pink wash, the padding one less so nothing shifts. */
@@ -681,6 +683,15 @@
   /* The phones take the larger share of the stage: they are the picture. */
   .stage-grid { display: grid; grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr); gap: calc(var(--s-xxl) + var(--s-lg)); align-items: center; width: 100%; }
   .stage-text { display: flex; flex-direction: column; gap: var(--s-lg); position: relative; z-index: 2; }
+  /* A soft shade of the stage's own navy behind the words, so the wave dims
+     as it passes under them and every line keeps its contrast (WCAG 1.4.3),
+     while it stays bright everywhere else. */
+  .stage-text::before {
+    content: ""; position: absolute; z-index: -1; pointer-events: none;
+    inset: -90px -140px -150px -200px;
+    background: radial-gradient(closest-side, var(--stage-bottom) 55%, transparent);
+    opacity: .92;
+  }
   .stage h1 { font-size: clamp(38px, 4.4vw, 58px); line-height: 1.05; letter-spacing: -0.02em; color: var(--stage-ink); text-wrap: balance; }
   .stage-lede { font-size: clamp(var(--t-h3), 2vw, 22px); line-height: 1.45; color: var(--stage-dim); max-width: 24em; }
   .stage-lede b { color: var(--stage-pink); font-weight: 600; }
@@ -703,7 +714,7 @@
     transition: border-color 150ms ease-out, background-color 150ms ease-out;
   }
   .link-stage:hover { border-color: var(--stage-ink); background: #FFFFFF14; }
-  .stage-note { font-size: 14.5px; color: var(--stage-muted); }
+  .stage-note { font-size: 14.5px; color: var(--stage-dim); }
 
   /* The phones, in depth. */
   .rig { position: relative; height: clamp(440px, 46vw, 660px); perspective: 1400px; }
@@ -786,7 +797,7 @@
   .promises li {
     display: flex; flex-direction: column;
     gap: var(--s-sm); padding: var(--s-xl) var(--s-xl) calc(var(--s-xl) + var(--s-sm));
-    background: var(--card); border: 1px solid var(--line); border-radius: var(--r-xl);
+    background: var(--card); border: 1px solid var(--line-strong); border-radius: var(--r-xl);
   }
   .safe-art {
     display: grid; place-items: center; height: 190px; margin: 0 0 var(--s-lg);
@@ -799,7 +810,7 @@
   .counts {
     display: flex; align-items: center; gap: var(--s-lg); flex-wrap: wrap;
     margin-top: var(--s-lg); padding: var(--s-lg) var(--s-xl);
-    border: 1px solid var(--line); border-radius: var(--r-lg);
+    border: 1px solid var(--line-strong); border-radius: var(--r-lg);
   }
   .counts p { flex: 1 1 420px; font-size: var(--t-body-app); color: var(--ink-dim); max-width: none; }
   .counts a { font-weight: 600; white-space: nowrap; }
@@ -810,6 +821,21 @@
     .promises li { padding: var(--s-lg) var(--s-lg) var(--s-xl); }
     .counts { padding: var(--s-md) var(--s-lg); }
   }
+
+  /* Pause for the stage's own motion (WCAG 2.2.2): the wave and the ridges'
+     wander stop and start again from here. The choice is kept on this
+     browser. Under reduced motion nothing moves, so the button is not shown. */
+  .motion {
+    position: absolute; right: var(--gutter); bottom: var(--s-lg); z-index: 3;
+    display: grid; place-items: center; width: 44px; height: 44px; padding: 0; cursor: pointer;
+    border-radius: 50%; background: #1B1E3899; color: var(--stage-ink);
+    border: 1px solid var(--stage-line); transition: border-color 150ms ease-out, background-color 150ms ease-out;
+  }
+  .motion:hover { border-color: var(--stage-ink); background: #1B1E38CC; }
+  .motion .i-play, .motion[aria-pressed="true"] .i-pause { display: none; }
+  .motion[aria-pressed="true"] .i-play { display: block; }
+  .stage.still .wv, .stage.still .pattern, .stage.still .spot-in { animation-play-state: paused; }
+  @media (prefers-reduced-motion: reduce) { .motion { display: none; } }
 </style>
 </head>
 <body>
@@ -861,6 +887,10 @@
       </div>
     </div>
   </div>
+  <button class="motion" type="button" aria-pressed="false" aria-label="Pause background motion">
+    <svg class="i-pause" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.22 3.84Q7.36 3.75 8.65 3.75Q9.94 3.75 10.08 3.84Q10.41 3.98 10.5 4.36Q10.5 4.59 10.5 12.12Q10.5 19.64 10.43 19.8Q10.36 19.97 10.17 20.11L10.03 20.2L8.72 20.25Q7.41 20.25 7.27 20.2Q6.98 20.11 6.84 19.83Q6.75 19.69 6.75 12Q6.75 4.31 6.84 4.17Q6.94 3.94 7.22 3.84ZM13.92 3.84Q13.92 3.84 13.92 3.84Q14.06 3.75 15.35 3.75Q16.64 3.75 16.78 3.84Q17.06 3.94 17.16 4.17Q17.25 4.36 17.25 12Q17.25 19.64 17.16 19.78Q17.06 20.06 16.83 20.16Q16.64 20.25 15.35 20.25Q14.06 20.25 13.97 20.2Q13.59 20.06 13.55 19.64Q13.5 19.41 13.5 12Q13.5 4.59 13.55 4.36Q13.59 3.98 13.92 3.84Z"/></svg>
+    <svg class="i-play" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 3.41Q6 3.41 6 3.41Q6.52 3.31 6.94 3.55Q7.12 3.64 12.94 7.11Q18.75 10.58 18.98 10.77Q19.5 11.23 19.5 11.96Q19.5 12.69 18.98 13.16Q18.8 13.39 12.91 16.91Q7.03 20.42 6.89 20.47Q5.91 20.89 5.06 20.14Q4.73 19.77 4.59 19.3Q4.5 19.06 4.5 11.98Q4.5 4.91 4.59 4.67Q4.73 4.2 5.06 3.83Q5.48 3.45 6 3.41Z"/></svg>
+  </button>
 </header>
 
 <main class="wrap wide">
@@ -1354,6 +1384,26 @@
       if (frame) { cancelAnimationFrame(frame); frame = 0; }
       stage.classList.remove("live");
       ["--rx", "--ry", "--z"].forEach(function (v) { phone.style.removeProperty(v); });
+    });
+  })();
+</script>
+<script>
+  // The stage's pause button.
+  (function () {
+    var stage = document.querySelector(".stage"), b = stage && stage.querySelector(".motion");
+    if (!b) return;
+    function set(paused) {
+      stage.classList.toggle("still", paused);
+      b.setAttribute("aria-pressed", paused ? "true" : "false");
+      b.setAttribute("aria-label", paused ? "Play background motion" : "Pause background motion");
+    }
+    var saved = null;
+    try { saved = localStorage.getItem("piggy-motion"); } catch (e) {}
+    set(saved === "paused");
+    b.addEventListener("click", function () {
+      var paused = !stage.classList.contains("still");
+      set(paused);
+      try { localStorage.setItem("piggy-motion", paused ? "paused" : "playing"); } catch (e) {}
     });
   })();
 </script>
