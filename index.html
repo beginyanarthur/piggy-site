@@ -621,8 +621,9 @@
   .rig-in {
     position: absolute; inset: 0; transform-style: preserve-3d;
     transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-    transition: transform 500ms cubic-bezier(.2,.8,.2,1);
+    transition: transform 220ms cubic-bezier(.2,.8,.2,1);
   }
+  .stage:not(.live) .rig-in { transition-duration: 600ms; }
   .rig img { position: absolute; height: auto; display: block; transition: transform 500ms cubic-bezier(.2,.8,.2,1), opacity 500ms ease-out; }
   .rig .front {
     width: 44%; left: 28%; top: 50%;
@@ -1013,7 +1014,8 @@
     }
     function tick() {
       frame = 0;
-      var k = 0.09;                           // share of the way each frame
+      // Quick while following the pointer, gentler when settling back.
+      var k = inside ? 0.3 : 0.12;
       dx += (tdx - dx) * k; dy += (tdy - dy) * k;
       gx += (tgx - gx) * k; gy += (tgy - gy) * k;
       draw();
