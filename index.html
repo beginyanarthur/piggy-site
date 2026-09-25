@@ -80,7 +80,7 @@
       --card: #3A4066;
       --line: #FFFFFF24; --line-strong: #FFFFFF73;
       --ink: #FFFFFF; --ink-dim: #FFFFFFCC; --ink-muted: #FFFFFFA6;
-      --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-ink: #FF9AD5; --card-raised: #454C79; --pink-strong: #D6389C; --on-pink: #1B1E38; --overlay: #0E1024BF;
+      --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-ink: #FF9AD5; --card-raised: #4E568C; --pink-strong: #D6389C; --on-pink: #1B1E38; --overlay: #0E1024BF;
     }
   }
   :root[data-theme="dark"] {
@@ -88,7 +88,7 @@
     --card: #3A4066;
     --line: #FFFFFF24; --line-strong: #FFFFFF73;
     --ink: #FFFFFF; --ink-dim: #FFFFFFCC; --ink-muted: #FFFFFFA6;
-    --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-ink: #FF9AD5; --card-raised: #454C79; --pink-strong: #D6389C; --on-pink: #1B1E38; --overlay: #0E1024BF;
+    --pink: #F45FC0; --income: #3FDE85; --pink-soft: #F45FC024; --pink-ink: #FF9AD5; --card-raised: #4E568C; --pink-strong: #D6389C; --on-pink: #1B1E38; --overlay: #0E1024BF;
   }
 
   * { box-sizing: border-box; }
@@ -423,8 +423,10 @@
     grid-template-columns: minmax(0, 1fr) 340px minmax(0, 1fr); column-gap: calc(var(--s-xxl) * 2);
     max-width: 1200px; margin: var(--s-xxl) auto var(--s-lg);
   }
-  .thread { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 0; }
+  .thread { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 2; }
   .thread-p { fill: none; stroke: var(--pink); stroke-width: 3; stroke-linecap: round; filter: drop-shadow(0 0 6px #F45FC066); }
+  .thread-start { fill: var(--pink); }
+  .thread-ring { fill: none; stroke: var(--pink); opacity: 0; }
   .thread-end { fill: var(--pink); filter: drop-shadow(0 0 6px #F45FC099); transition: opacity 200ms ease-out; }
   .ot-col { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--s-xxl); }
   /* Both columns read the same way: cards hug the phone side, text always
@@ -443,8 +445,8 @@
      told apart by its edge and shadow, and in dark it takes the app's raised
      surface, a step lighter than the band. */
   .ot.on {
-    background: var(--card-raised); border-color: var(--line-strong);
-    box-shadow: 0 18px 40px -20px var(--overlay), 0 2px 8px -4px var(--overlay);
+    background: var(--card-raised); border-color: var(--pink);
+    box-shadow: 0 0 0 1px var(--pink), 0 24px 48px -18px #0E1024B3, 0 0 40px -8px #F45FC040;
     transform: translateY(-2px);
   }
   .ot-b {
@@ -453,8 +455,12 @@
     transition: color 200ms ease-out, transform 200ms ease-out;
   }
   .ot-b:hover { color: var(--ink); }
+  /* Each step wears the app's own glyph for it, so a reader meets the icons
+     here before the app: add for income, down for allocate, up for spend
+     (the History row's own arrows), the Check tab's wallet, a calendar for
+     the month ahead. The number is still under the phone. */
   .ot-n {
-    flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
+    flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%;
     font-size: var(--t-body-app); font-weight: 700; color: var(--pink-ink); background: var(--pink-soft);
     transition: background-color 250ms ease-out, color 250ms ease-out;
   }
@@ -464,7 +470,7 @@
   .od { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 400ms cubic-bezier(.2,.8,.2,1), opacity 300ms ease-out; }
   .od > p { overflow: hidden; margin: 0; color: var(--ink-dim); font-size: 17px; line-height: 1.6; }
   .ot.on .od { grid-template-rows: 1fr; opacity: 1; transition-delay: 150ms; }
-  .ot.on .od > p { padding: var(--s-md) 0 0 calc(32px + var(--s-md)); }
+  .ot.on .od > p { padding: var(--s-md) 0 0 calc(36px + var(--s-md)); }
   .ot-mid { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: var(--s-xxl); }
   /* The phone keeps one size for every step, so the numbers and arrows under
      it never move: the screenshots differ a little in shape, and each now
@@ -784,11 +790,11 @@
     background: var(--card); border: 1px solid var(--line-strong); border-radius: var(--r-xl);
   }
   .safe-art {
-    display: grid; place-items: center; height: 190px; margin: 0 0 var(--s-lg);
+    display: grid; place-items: center; height: 132px; margin: 0 0 var(--s-lg);
   }
   /* The images' own soft glow is faded out at their edges when they are made,
      so no faint box shows; the artwork itself is never cut. */
-  .safe-art img { width: auto; height: 160px; max-width: 100%; object-fit: contain; display: block; }
+  .safe-art img { width: auto; height: 112px; max-width: 100%; object-fit: contain; display: block; }
   .promises b { font-size: var(--t-h3); font-weight: 600; color: var(--ink); line-height: 1.3; }
   .promises li > span:last-child { font-size: var(--t-body-app); line-height: 1.55; color: var(--ink-dim); }
   .counts {
@@ -801,7 +807,7 @@
   @media (max-width: 1000px) { .promises { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 560px) {
     .promises { grid-template-columns: 1fr; }
-    .safe-art { height: 160px; } .safe-art img { height: 134px; }
+    .safe-art { height: 120px; } .safe-art img { height: 100px; }
     .promises li { padding: var(--s-lg) var(--s-lg) var(--s-xl); }
     .counts { padding: var(--s-md) var(--s-lg); }
   }
@@ -855,10 +861,10 @@
       <p class="stage-lede">It is about the life you want. When your money has a plan, your mind has room for everything else.</p>
       <div class="stage-actions">
         <span class="store" role="img" aria-label="Coming soon to the App Store">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6.2" y="2.4" width="11.6" height="19.2" rx="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M10.6 5.5h2.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6.2" y="2.4" width="11.6" height="19.2" rx="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M10.6 5.5h2.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
           <span><small>Coming soon to the</small>App Store</span>
         </span>
-        <a class="link-stage" href="https://t.me/piggy_research"><svg class="tg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg> Follow on Telegram</a>
+        <a class="link-stage" href="https://t.me/piggy_research"><svg class="tg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg> Follow on Telegram</a>
       </div>
       <p class="stage-note">iPhone, iOS 16.4 and later. In closed beta now.</p>
     </div>
@@ -897,19 +903,19 @@
     <h2>What does a month look like?</h2>
     <p class="lead-in">Five steps, every month. Tap a number to follow the path.</p>
     <div class="orbit">
-      <svg class="thread" aria-hidden="true"><path class="thread-p" d=""/><circle class="thread-end" r="6" cx="-20" cy="-20"/></svg>
+      <svg class="thread" aria-hidden="true"><path class="thread-p" d=""/><circle class="thread-start" r="5" cx="-20" cy="-20"/><circle class="thread-end" r="6" cx="-20" cy="-20"/><circle class="thread-ring" r="6" cx="-20" cy="-20"/></svg>
       <div class="ot-col left">
         <div class="ot on" data-step="1">
-          <button class="ot-b" type="button" aria-controls="od-1" aria-expanded="true"><span class="ot-n">1</span><span class="ot-t">Money comes in</span></button>
-          <div class="od" id="od-1"><p>Your salary, a side job, a gift. Add it, and Piggy holds it until you say where it goes.</p></div>
+          <button class="ot-b" type="button" aria-controls="od-1" aria-expanded="true"><span class="ot-n" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11.62 4.64Q11.62 4.64 11.62 4.64Q11.86 4.45 12.16 4.52Q12.47 4.59 12.66 4.87Q12.66 4.87 12.75 5.01V8.11V11.25H15.84H18.94L19.12 11.34Q19.5 11.58 19.5 12Q19.5 12.42 19.12 12.65Q19.12 12.65 18.98 12.75H15.89H12.75V15.89V18.98L12.66 19.12Q12.42 19.5 12 19.5Q11.58 19.5 11.34 19.12Q11.34 19.12 11.25 18.98V15.89V12.75H8.11H5.02L4.88 12.65Q4.5 12.42 4.5 12Q4.5 11.58 4.83 11.39Q4.83 11.39 5.02 11.25H8.11H11.25V8.11V5.01L11.34 4.87Q11.44 4.73 11.62 4.64Z"/></svg></span><span class="ot-t">Add income</span></button>
+          <div class="od" id="od-1"><p>Money you received: a salary, a gift, anything at all. Say where it came from.</p></div>
         </div>
         <div class="ot" data-step="3">
-          <button class="ot-b" type="button" aria-controls="od-3" aria-expanded="false"><span class="ot-n">3</span><span class="ot-t">You spend from a bag</span></button>
-          <div class="od" id="od-3"><p>Tap the button, pick the bag, type the amount. Each bag shows what is left while you choose, so you know before you spend and not after.</p></div>
+          <button class="ot-b" type="button" aria-controls="od-3" aria-expanded="false"><span class="ot-n" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11.67 3.62Q11.67 3.62 11.67 3.62Q12.09 3.48 12.52 3.72Q12.7 3.81 16.2 7.33Q19.69 10.84 19.78 11.08Q19.88 11.31 19.88 11.45Q19.88 11.83 19.59 12.16Q19.12 12.76 18.38 12.53Q18.19 12.44 15.68 9.95Q13.17 7.47 13.15 7.47Q13.12 7.47 13.12 13.56Q13.12 13.56 13.08 19.66L12.98 19.84Q12.8 20.22 12.38 20.36Q12 20.5 11.62 20.36Q11.2 20.22 11.02 19.84Q11.02 19.84 10.92 19.66L10.88 13.51V7.37L8.34 9.91Q5.81 12.44 5.62 12.53Q4.88 12.76 4.41 12.16Q4.12 11.83 4.12 11.45Q4.12 11.31 4.2 11.08Q4.27 10.84 7.76 7.35Q11.25 3.86 11.39 3.76Q11.53 3.67 11.67 3.62Z"/></svg></span><span class="ot-t">Log a spend</span></button>
+          <div class="od" id="od-3"><p>Log every spend, or drop in rough amounts when you remember. Both work.</p></div>
         </div>
         <div class="ot" data-step="5">
-          <button class="ot-b" type="button" aria-controls="od-5" aria-expanded="false"><span class="ot-n">5</span><span class="ot-t">You plan the next month</span></button>
-          <div class="od" id="od-5"><p>Most months look like the one before. Copy the last one or start from scratch, then change what needs changing. More here, less there, and it starts again.</p></div>
+          <button class="ot-b" type="button" aria-controls="od-5" aria-expanded="false"><span class="ot-n" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M5.62 1.64Q5.86 1.45 6.16 1.52Q6.47 1.59 6.66 1.88Q6.75 2.02 6.75 2.53V3H12H17.25V2.53Q17.25 2.02 17.34 1.88Q17.58 1.5 18 1.5Q18.42 1.5 18.66 1.88Q18.75 2.02 18.75 2.48V3H19.41Q20.25 3.05 20.77 3.28Q22.03 3.89 22.41 5.3Q22.5 5.53 22.52 12.45Q22.55 19.36 22.5 19.78Q22.36 20.86 21.66 21.61Q20.91 22.36 19.83 22.5Q19.45 22.5 12 22.5Q4.55 22.5 4.17 22.5Q3.14 22.36 2.39 21.66Q1.64 20.86 1.5 19.78Q1.45 19.36 1.48 12.45Q1.5 5.53 1.59 5.3Q1.97 3.89 3.23 3.28Q3.75 3.05 4.59 3H5.25V2.48Q5.25 1.83 5.62 1.64ZM20.02 4.59Q19.78 4.5 12 4.5H4.17L3.94 4.59Q3.52 4.78 3.23 5.2Q3 5.58 3 6.38V6.75H12H21V6.33Q21 5.91 20.95 5.67Q20.77 4.88 20.02 4.59ZM21 14.06V8.25H12H3V14.06V19.88L3.14 20.11Q3.38 20.62 3.89 20.86L4.12 21H12H19.88L20.11 20.86Q20.62 20.62 20.86 20.11L21 19.88ZM13.55 9.8Q13.64 9.75 13.95 9.77Q14.25 9.8 14.39 9.89Q15 10.22 15 10.88Q15 11.44 14.53 11.79Q14.06 12.14 13.5 11.95Q13.08 11.81 12.89 11.39Q12.66 10.97 12.84 10.5Q13.03 9.98 13.55 9.8ZM18 9.84Q18.42 9.94 18.63 10.36Q18.84 10.78 18.7 11.16Q18.47 11.91 17.72 12Q17.02 12.05 16.66 11.46Q16.31 10.88 16.64 10.31Q16.83 10.03 17.2 9.84Q17.58 9.66 18 9.84ZM5.91 13.59Q6.38 13.41 6.89 13.64Q7.41 13.88 7.48 14.46Q7.55 15.05 7.12 15.42Q6.84 15.75 6.38 15.75Q5.67 15.75 5.34 15.09Q5.16 14.62 5.34 14.2Q5.53 13.78 5.91 13.59ZM9.66 13.59Q9.84 13.5 10.17 13.55Q10.88 13.55 11.16 14.16Q11.34 14.53 11.2 15Q11.06 15.42 10.64 15.63Q10.22 15.84 9.84 15.7Q9.09 15.47 9.02 14.72Q8.95 13.97 9.66 13.59ZM13.5 13.59Q13.64 13.55 13.88 13.5Q14.34 13.5 14.72 13.88Q15.14 14.34 14.95 14.93Q14.77 15.52 14.16 15.7Q13.64 15.84 13.2 15.52Q12.75 15.19 12.75 14.62Q12.75 13.88 13.5 13.59ZM17.11 13.64Q17.91 13.27 18.47 13.88Q18.75 14.2 18.75 14.62Q18.75 15.09 18.42 15.42Q18.09 15.75 17.62 15.75Q17.16 15.75 16.88 15.42Q16.45 15.05 16.52 14.46Q16.59 13.88 17.11 13.64ZM6.14 17.3Q6.66 17.16 7.08 17.51Q7.5 17.86 7.5 18.38Q7.5 19.08 6.87 19.38Q6.23 19.69 5.67 19.22Q5.11 18.75 5.3 18.09Q5.48 17.39 6.14 17.3ZM9.84 17.3Q10.22 17.2 10.64 17.41Q11.06 17.62 11.2 18Q11.34 18.47 11.16 18.84Q10.97 19.22 10.64 19.36Q10.27 19.55 9.84 19.45Q9.28 19.31 9.09 18.75Q8.91 18.28 9.12 17.86Q9.33 17.44 9.84 17.3ZM13.59 17.3Q13.59 17.3 13.59 17.3Q14.11 17.16 14.53 17.46Q14.95 17.77 15 18.28Q15.05 19.22 14.16 19.45Q13.64 19.59 13.22 19.29Q12.8 18.98 12.75 18.47Q12.7 17.53 13.59 17.3Z"/></svg></span><span class="ot-t">Plan next month</span></button>
+          <div class="od" id="od-5"><p>Most months look like the one before. You can change every amount later.</p></div>
         </div>
       </div>
       <div class="ot-mid">
@@ -931,23 +937,23 @@
         <div class="stepper">
           <button class="arrow prev" type="button" aria-label="Previous step"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.09 4.16Q15.09 4.16 15.09 4.16Q15.42 4.07 15.8 4.23Q16.17 4.4 16.36 4.72Q16.64 5.24 16.36 5.76Q16.31 5.9 13.27 8.94Q13.27 8.94 10.22 11.99L13.27 15.04Q16.31 18.08 16.36 18.22Q16.55 18.55 16.45 18.93Q16.41 19.35 16.05 19.63Q15.7 19.91 15.28 19.87Q14.95 19.82 14.48 19.4Q14.02 18.97 11.2 16.16Q8.34 13.3 7.92 12.83Q7.5 12.37 7.5 11.99Q7.5 11.62 7.9 11.17Q8.3 10.72 11.11 7.91Q14.48 4.49 14.7 4.35Q14.91 4.21 15.09 4.16Z"/></svg></button>
           <div class="dots" role="group" aria-label="The five steps of a month">
-          <button class="dot on" type="button" data-step="1" aria-pressed="true" aria-label="Step 1: Money comes in">1</button>
-          <button class="dot" type="button" data-step="2" aria-pressed="false" aria-label="Step 2: You give each bag its share">2</button>
-          <button class="dot" type="button" data-step="3" aria-pressed="false" aria-label="Step 3: You spend from a bag">3</button>
-          <button class="dot" type="button" data-step="4" aria-pressed="false" aria-label="Step 4: You check the real money">4</button>
-          <button class="dot" type="button" data-step="5" aria-pressed="false" aria-label="Step 5: You plan the next month">5</button>
+          <button class="dot on" type="button" data-step="1" aria-pressed="true" aria-label="Step 1: Add income">1</button>
+          <button class="dot" type="button" data-step="2" aria-pressed="false" aria-label="Step 2: Allocate">2</button>
+          <button class="dot" type="button" data-step="3" aria-pressed="false" aria-label="Step 3: Log a spend">3</button>
+          <button class="dot" type="button" data-step="4" aria-pressed="false" aria-label="Step 4: Money check">4</button>
+          <button class="dot" type="button" data-step="5" aria-pressed="false" aria-label="Step 5: Plan next month">5</button>
           </div>
           <button class="arrow next" type="button" aria-label="Next step"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.39 4.16Q8.39 4.16 8.39 4.16Q8.77 4.07 9.14 4.25Q9.28 4.3 12.8 7.82Q15.7 10.68 16.1 11.15Q16.5 11.61 16.5 11.99Q16.5 12.36 16.1 12.83Q15.7 13.3 12.8 16.16Q9.98 18.97 9.52 19.4Q9.05 19.82 8.72 19.86Q8.3 19.91 7.95 19.63Q7.59 19.35 7.55 18.93Q7.45 18.55 7.64 18.22Q7.69 18.08 10.73 15.04Q10.73 15.04 13.78 11.99L10.73 8.94Q7.69 5.9 7.64 5.75Q7.45 5.43 7.55 5.05Q7.64 4.3 8.39 4.16Z"/></svg></button>
         </div>
       </div>
       <div class="ot-col right">
         <div class="ot" data-step="2">
-          <button class="ot-b" type="button" aria-controls="od-2" aria-expanded="false"><span class="ot-n">2</span><span class="ot-t">You give each bag its share</span></button>
-          <div class="od" id="od-2"><p>Share what came in between your bags until nothing is left to allocate. If something you need has no bag yet, a trip, a laptop, a rainy day, make one on the way and give it what you can.</p></div>
+          <button class="ot-b" type="button" aria-controls="od-2" aria-expanded="false"><span class="ot-n" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11.69 3.6Q11.69 3.6 11.69 3.6Q12.06 3.51 12.44 3.67Q12.81 3.84 13 4.17Q13 4.17 13.09 4.35L13.14 10.45Q13.14 16.54 13.16 16.54Q13.19 16.54 15.69 14.06Q18.2 11.57 18.44 11.48Q18.86 11.38 19.26 11.57Q19.65 11.76 19.79 12.18Q19.94 12.56 19.79 12.93Q19.7 13.17 16.19 16.68Q13.37 19.54 12.9 19.96Q12.44 20.38 12.06 20.43Q11.87 20.43 11.64 20.34Q11.4 20.24 7.89 16.77Q5.03 13.92 4.61 13.45Q4.19 12.98 4.14 12.6Q4.09 11.95 4.75 11.57Q5.12 11.34 5.59 11.48Q5.83 11.57 8.36 14.1Q8.36 14.1 10.89 16.63V10.54Q10.89 4.49 10.94 4.35Q11.12 3.84 11.69 3.6Z"/></svg></span><span class="ot-t">Allocate</span></button>
+          <div class="od" id="od-2"><p>Putting money into bags. Every time income arrives, you split it between your bags: rent, food, fun.</p></div>
         </div>
         <div class="ot" data-step="4">
-          <button class="ot-b" type="button" aria-controls="od-4" aria-expanded="false"><span class="ot-n">4</span><span class="ot-t">You check the real money</span></button>
-          <div class="od" id="od-4"><p>Does Piggy match the money you really have? Count your cash and cards to find out. If the two do not agree, Piggy helps you fix the difference.</p></div>
+          <button class="ot-b" type="button" aria-controls="od-4" aria-expanded="false"><span class="ot-n" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16.64 2.63Q17.86 2.54 18.84 3.29Q20.02 4.22 20.06 5.96V6.43L20.2 6.47Q21.66 6.8 22.22 8.16Q22.45 8.63 22.48 9.22Q22.5 9.8 22.5 13.88Q22.5 18.8 22.45 19.08Q22.03 20.58 20.62 21.15Q20.2 21.33 19.29 21.36Q18.38 21.38 12 21.38Q5.62 21.38 4.71 21.36Q3.8 21.33 3.38 21.15Q1.97 20.58 1.55 19.08Q1.5 18.8 1.5 13.11Q1.5 7.41 1.59 7.13Q2.02 5.49 3.56 4.93Q3.84 4.83 10.17 3.76Q16.5 2.68 16.64 2.63ZM17.62 4.27Q17.25 4.13 16.45 4.22Q15.66 4.32 10.41 5.21Q4.12 6.29 4.03 6.38L3.89 6.43L4.08 6.38Q4.31 6.38 11.39 6.38H18.52V5.82Q18.52 5.3 18.38 5.07Q18.14 4.55 17.62 4.27ZM20.02 7.97Q19.78 7.88 12 7.88H4.17L3.94 7.97Q3.19 8.3 3.05 9.05Q3 9.38 3 13.95Q3 18.52 3.05 18.76Q3.23 19.46 3.98 19.79L4.22 19.88H12H19.78L20.02 19.79Q20.81 19.46 20.95 18.71Q21 18.47 21 13.88Q21 9.29 20.95 9.05Q20.77 8.26 20.02 7.97ZM16.92 12.43Q16.92 12.43 16.92 12.43Q17.39 12.29 17.91 12.52Q18.75 12.94 18.75 13.88Q18.75 14.44 18.38 14.86Q17.86 15.43 17.13 15.38Q16.41 15.33 15.98 14.68Q15.75 14.3 15.75 13.74Q15.84 12.71 16.92 12.43Z"/></svg></span><span class="ot-t">Money check</span></button>
+          <div class="od" id="od-4"><p>Does it match the money you really have? Count your cash and cards to find out.</p></div>
         </div>
       </div>
     </div>
@@ -959,8 +965,8 @@
     <ul class="promises">
       <li>
         <span class="safe-art"><img src="art/safe-phone.webp" alt="" width="220" height="220" loading="lazy"></span>
-        <b>No bank login, no account</b>
-        <span>Your numbers are not on anyone's server, mine included.</span>
+        <b>No bank login, no server</b>
+        <span>Your account lives on this phone, and so do your numbers. They are not on anyone's server, mine included.</span>
       </li>
       <li>
         <span class="safe-art"><img src="art/safe-faceid.webp" alt="" width="220" height="220" loading="lazy"></span>
@@ -1099,37 +1105,42 @@
     var dots = [].slice.call(orbit.querySelectorAll(".dot"));
     var items = [].slice.call(orbit.querySelectorAll(".ot"));
     var shots = [].slice.call(orbit.querySelectorAll(".phone-col .shot"));
-    var path = orbit.querySelector(".thread-p"), end = orbit.querySelector(".thread-end");
+    var path = orbit.querySelector(".thread-p"), end = orbit.querySelector(".thread-end"), start = orbit.querySelector(".thread-start"), ring = orbit.querySelector(".thread-ring");
     var still = window.matchMedia("(prefers-reduced-motion: reduce)");
     var current = 1;
     var prev = orbit.querySelector(".arrow.prev"), next = orbit.querySelector(".arrow.next");
     function item(n) { return items.filter(function (i) { return i.getAttribute("data-step") === String(n); })[0]; }
     function route(n) {
+      // From the phone's edge, level with the card's title, a short S-curve
+      // across the gap to the card: the line joins the screen to what
+      // explains it. The number below already shows which step is chosen.
       var o = orbit.getBoundingClientRect();
-      var d = dots[n - 1].getBoundingClientRect();
       var ph = orbit.querySelector(".phone-col").getBoundingClientRect();
       var t = item(n).getBoundingClientRect(), tb = item(n).querySelector(".ot-b").getBoundingClientRect();
       var left = item(n).parentNode.classList.contains("left");
-      // Down out of the number, along under the row, up the lane beside the
-      // phone and into the title: it never crosses another number or the phone.
-      var x0 = d.left + d.width / 2 - o.left, y0 = d.bottom - o.top;
-      var below = y0 + 30;
-      var x1 = (left ? t.right + 8 : t.left - 8) - o.left, y1 = tb.top + tb.height / 2 - o.top;
-      var edge = (left ? ph.left : ph.right) - o.left;
-      // The lane runs between the button row and the card, clear of both.
-      var st = orbit.querySelector(".stepper").getBoundingClientRect();
-      var stEdge = (left ? st.left : st.right) - o.left;
-      var lane = left ? Math.min((edge + x1) / 2, stEdge - 18) : Math.max((edge + x1) / 2, stEdge + 18);
-      var r = 22, sx = left ? -1 : 1;
-      var dp = "M" + x0 + " " + y0 +
-        " L" + x0 + " " + (below - r) +
-        " Q" + x0 + " " + below + " " + (x0 + sx * r) + " " + below +
-        " L" + (lane - sx * r) + " " + below +
-        " Q" + lane + " " + below + " " + lane + " " + (below - r) +
-        " L" + lane + " " + (y1 + r) +
-        " Q" + lane + " " + y1 + " " + (lane + sx * r) + " " + y1 +
-        " L" + x1 + " " + y1;
-      return { d: dp, x: x1, y: y1 };
+      var y1 = tb.top + tb.height / 2 - o.top;
+      var y0 = Math.max(ph.top + 60, Math.min(ph.bottom - 60, tb.top + tb.height / 2)) - o.top;
+      var x0 = (left ? ph.left + 6 : ph.right - 6) - o.left;
+      var x1 = (left ? t.right + 8 : t.left - 8) - o.left;
+      // Some steps get a single soft curve, some a wave, each with its own
+      // depth and lean, so no two connections look stamped out. Kind:
+      // "c" curve (one bow), "w" wave (one S), "d" deep wave.
+      var shapes = [
+        { k: "c", d: 26 },          // Add income: a bow that sags
+        { k: "w", d: 16, a: .35 },  // Allocate: a soft S
+        { k: "c", d: -22 },         // Log a spend: a bow that lifts
+        { k: "d", d: 24, a: .5 },   // Money check: a fuller wave
+        { k: "c", d: 18 }           // Plan next month: a shallow bow
+      ];
+      var S = shapes[(n - 1) % 5], dx = x1 - x0, dp;
+      if (S.k === "c") {
+        var mx = (x0 + x1) / 2, my = (y0 + y1) / 2 + S.d;
+        dp = "M" + x0 + " " + y0 + " Q" + mx + " " + (my + S.d * 0.6) + " " + x1 + " " + y1;
+      } else {
+        var amp = S.d, c1x = x0 + dx * S.a, c2x = x0 + dx * (1 - S.a * 0.6);
+        dp = "M" + x0 + " " + y0 + " C" + c1x + " " + (y0 + amp) + " " + c2x + " " + (y1 - amp) + " " + x1 + " " + y1;
+      }
+      return { d: dp, x: x1, y: y1, sx: x0, sy: y0 };
     }
     function draw(animate) {
       if (getComputedStyle(path.parentNode).display === "none") return;
@@ -1138,13 +1149,22 @@
       var len = path.getTotalLength();
       path.style.transition = "none";
       path.style.strokeDasharray = len;
-      end.setAttribute("cx", r.x); end.setAttribute("cy", r.y);
-      if (!animate || still.matches) { path.style.strokeDashoffset = 0; end.style.opacity = 1; return; }
+      end.setAttribute("cx", r.x); end.setAttribute("cy", r.y); start.setAttribute("cx", r.sx); start.setAttribute("cy", r.sy);
+      if (!animate || still.matches || !path.animate) { path.style.strokeDashoffset = 0; end.style.opacity = 1; start.style.opacity = 1; return; }
+      // The dot on the phone pops, the wave pours out of it with a soft ease,
+      // and the dot on the card lands with a little bounce and a ring that
+      // spreads and fades. Under half a second, and nothing loops.
       path.style.strokeDashoffset = len; end.style.opacity = 0;
+      start.animate([{ r: 0, opacity: 0 }, { r: 7, opacity: 1, offset: .6 }, { r: 5, opacity: 1 }], { duration: 260, easing: "cubic-bezier(.3,1.4,.5,1)" });
       path.getBoundingClientRect();
-      path.style.transition = "stroke-dashoffset 800ms cubic-bezier(.45,0,.2,1)";
+      path.style.transition = "stroke-dashoffset 520ms cubic-bezier(.22,.8,.28,1) 90ms";
       path.style.strokeDashoffset = 0;
-      setTimeout(function () { end.style.opacity = 1; }, 720);
+      setTimeout(function () {
+        end.style.opacity = 1;
+        end.animate([{ r: 0 }, { r: 8.5, offset: .55 }, { r: 5.5, offset: .8 }, { r: 6 }], { duration: 380, easing: "cubic-bezier(.3,1.3,.5,1)" });
+        ring.setAttribute("cx", r.x); ring.setAttribute("cy", r.y);
+        ring.animate([{ r: 6, opacity: .55, strokeWidth: 3 }, { r: 20, opacity: 0, strokeWidth: 1 }], { duration: 520, easing: "cubic-bezier(.2,.7,.3,1)" });
+      }, 540);
     }
     // Changing step moves the phone a little, forward one way and back the
     // other, while the new screen comes in. Instant under reduced motion.
@@ -1220,7 +1240,7 @@
         path.setAttribute("d", r.d);
         var len = path.getTotalLength();
         path.style.strokeDasharray = len; path.style.strokeDashoffset = 0;
-        end.setAttribute("cx", r.x); end.setAttribute("cy", r.y);
+        end.setAttribute("cx", r.x); end.setAttribute("cy", r.y); start.setAttribute("cx", r.sx); start.setAttribute("cy", r.sy);
       });
     });
     dots.forEach(function (d, i) {
