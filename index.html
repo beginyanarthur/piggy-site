@@ -659,19 +659,18 @@
     the stage behind the phones, as in the brand's films. Two layers, each a
     strip twice the stage wide of a tile that repeats without a seam, slide
     left at different speeds, so the ribbons seem to flow and fold rather
-    than move as one. Only transforms change, so it is smooth; the edges
-    fade out; it stands still under reduced motion.
+    than move as one. Only transforms change, so it is smooth. It runs
+    clear to both edges of the screen, and stands still under reduced motion.
   */
   .waves {
     position: absolute; left: 0; right: 0; top: 18%; height: 78%; z-index: -1; overflow: hidden; pointer-events: none;
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
-            mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
   }
   /* The tile keeps its own width, 1600, at every screen size, so a phone sees
-     the same gentle ribbons as a desktop instead of one squeezed into it. */
-  .wv { position: absolute; top: 0; left: 0; height: 100%; width: 3200px; background-repeat: repeat-x; background-size: 1600px 100%; will-change: transform; }
-  .wv.far { background-image: url("art/wave-far.svg"); animation: flow 320s linear infinite; opacity: .9; }
-  .wv.near { background-image: url("art/wave-near.svg"); animation: flow 200s linear infinite reverse; }
+     the same gentle ribbons as a desktop. The strip is the stage plus two
+     tiles wide, so however far it has slid, the screen is always covered. */
+  .wv { position: absolute; top: 0; left: 0; height: 100%; width: calc(100% + 3200px); background-repeat: repeat-x; background-size: 1600px 100%; will-change: transform; }
+  .wv.far { background-image: url("art/wave-far.webp"); animation: flow 320s linear infinite; opacity: .9; }
+  .wv.near { background-image: url("art/wave-near.webp"); animation: flow 200s linear infinite reverse; }
   @keyframes flow { from { transform: translateX(0); } to { transform: translateX(-1600px); } }
   /* Stacked, the ribbons run behind the phone, not behind the words. */
   @media (max-width: 880px) { .waves { top: auto; bottom: 4%; height: 420px; } }
