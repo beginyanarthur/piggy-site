@@ -418,17 +418,22 @@
      four on the right, at their own heights. Choosing a number draws a pink
      thread from it out to its title, which lights up and opens to its
      sentence while the phone shows that step's screen. */
+  /* The whole map, heading to numbers, fits one screen: the phone takes its
+     height from the window (what is left after the bar, the heading and the
+     numbers) and its width follows the screenshot's shape. */
   .orbit {
+    --phone-h: clamp(400px, calc(100svh - 310px), 678px);
+    --phone-w: calc(var(--phone-h) * 1003 / 2000);
     position: relative; display: grid; align-items: start;
-    grid-template-columns: minmax(0, 1fr) 340px minmax(0, 1fr); column-gap: calc(var(--s-xxl) * 2);
-    max-width: 1200px; margin: var(--s-xxl) auto var(--s-lg);
+    grid-template-columns: minmax(0, 1fr) var(--phone-w) minmax(0, 1fr); column-gap: calc(var(--s-xxl) * 2);
+    max-width: 1200px; margin: var(--s-lg) auto 0;
   }
   .thread { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 2; }
   .thread-p { fill: none; stroke: var(--pink); stroke-width: 3; stroke-linecap: round; filter: drop-shadow(0 0 6px #F45FC066); }
   .thread-start { fill: var(--pink); }
   .thread-ring { fill: none; stroke: var(--pink); opacity: 0; }
   .thread-end { fill: var(--pink); filter: drop-shadow(0 0 6px #F45FC099); transition: opacity 200ms ease-out; }
-  .ot-col { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--s-xxl); }
+  .ot-col { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--s-xl); }
   /* Both columns read the same way: cards hug the phone side, text always
      starts on the left, the number always first. */
   .ot-col.left { align-items: flex-end; padding-top: var(--s-md); }
@@ -471,7 +476,7 @@
   .od > p { overflow: hidden; margin: 0; color: var(--ink-dim); font-size: 17px; line-height: 1.6; }
   .ot.on .od { grid-template-rows: 1fr; opacity: 1; transition-delay: 150ms; }
   .ot.on .od > p { padding: var(--s-md) 0 0 calc(36px + var(--s-md)); }
-  .ot-mid { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: var(--s-xxl); }
+  .ot-mid { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: var(--s-lg); }
   /* The phone keeps one size for every step, so the numbers and arrows under
      it never move: the screenshots differ a little in shape, and each now
      sits inside the same frame instead of setting the height itself. The
@@ -509,7 +514,7 @@
   :root:not(.js) .phone-col .shot + .shot { display: none; }
   /* Previous and next sit either side of the numbers: quieter than them,
      outline only, and gone at the ends where there is nowhere to go. */
-  .stepper { display: flex; align-items: center; gap: var(--s-sm); margin-bottom: var(--s-xl); }
+  .stepper { display: flex; align-items: center; gap: var(--s-sm); }
   .dots { display: flex; gap: 12px; }
   .arrow {
     display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;
@@ -839,6 +844,23 @@
     .feature { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "head minis" "actions minis"; column-gap: var(--s-xxl); row-gap: var(--s-lg); align-items: start; }
     .feature .head { grid-area: head; } .feature .minis { grid-area: minis; grid-template-columns: 1fr; align-self: center; } .feature .actions { grid-area: actions; }
   }
+  /* Budget reviews is a door to another page, not part of the app's story,
+     so it gets its own room: a full width band washed in Piggy's pink, more
+     air above and below, and no panel of its own. The two choices are the
+     only cards in it, white on the pink so they read as the thing to press. */
+  #review { position: relative; isolation: isolate; padding-block: calc(var(--s-xxl) * 2.5); margin-block: var(--s-xxl); }
+  #review::before {
+    content: ""; position: absolute; z-index: -1;
+    top: 0; bottom: 0; left: calc(50% - 50vw); right: calc(50% - 50vw);
+    background:
+      radial-gradient(60% 90% at 85% 50%, color-mix(in srgb, var(--pink) 16%, transparent), transparent 70%),
+      linear-gradient(color-mix(in srgb, var(--pink) 9%, var(--bg-top)), color-mix(in srgb, var(--pink) 7%, var(--bg-bottom)));
+    border-top: 1px solid color-mix(in srgb, var(--pink) 30%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--pink) 30%, transparent);
+  }
+  #review .feature { background: none; border: 0; padding: 0; }
+  #review .pick { background: var(--card-raised); }
+  #review .pick[aria-checked="true"] { background: var(--card-raised); }
   .feature .lead-in { text-wrap: balance; }
   .years {
     align-self: flex-start; display: inline-flex; align-items: center; gap: var(--s-sm);
@@ -870,6 +892,23 @@
   @media (max-width: 560px) { .store-b, .end-link { width: 100%; } }
 
   /* Need a hand: three small cards you can click, so they float. */
+  /* The page ends where it began, on the app's night: help and the footer
+     sit on the stage's navy, so the last thing seen is a clear edge, not the
+     page running out. Inside, the dark theme's own tokens apply. */
+  .end-band {
+    position: relative; isolation: isolate; margin-top: var(--s-xxl);
+    --card: #3A4066; --card-raised: #4E568C;
+    --line: #FFFFFF24; --line-strong: #FFFFFF73;
+    --ink: #FFFFFF; --ink-dim: #FFFFFFCC; --ink-muted: #FFFFFFA6;
+    --pink: #F45FC0; --pink-soft: #F45FC024; --pink-ink: #FF9AD5; --overlay: #0E1024BF;
+    color: var(--ink);
+  }
+  .end-band::before {
+    content: ""; position: absolute; z-index: -1;
+    top: 0; bottom: 0; left: calc(50% - 50vw); right: calc(50% - 50vw);
+    background: linear-gradient(var(--stage-top), var(--stage-bottom));
+  }
+  .end-band > #help { padding-top: calc(var(--s-xxl) + var(--s-lg)); }
   .helps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-md); margin: var(--s-sm) 0 0; padding: 0; list-style: none; max-width: none; }
   .helps a {
     display: flex; align-items: center; gap: var(--s-md); height: 100%;
@@ -1092,6 +1131,7 @@
     </div>
   </section>
 
+  <div class="end-band">
   <section id="help" class="quiet">
     <p class="kicker">Support</p>
     <h2>Need a hand?</h2>
@@ -1108,6 +1148,7 @@
     <p><a href="https://beginyanarthur.github.io/piggy-privacy/" target="_blank" rel="noopener">Privacy policy</a> · <a href="https://beginyanarthur.github.io/piggy-privacy/support.html">Support</a></p>
     <p>Amounts are Armenian dram (֏).</p>
   </footer>
+  </div>
 
 </main>
 <script>
