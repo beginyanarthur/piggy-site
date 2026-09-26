@@ -218,6 +218,18 @@
   @media (max-width: 720px) {
     .hero-l { padding-top: var(--s-xl); }
   }
+  /* The hero is its own room: a white band edge to edge, with more air
+     above and below, so the page opens like the front page does and the
+     reads below start on the ground again. */
+  html, body { overflow-x: clip; }
+  .hero-l { position: relative; isolation: isolate; padding-block: calc(var(--s-xxl) * 2) calc(var(--s-xxl) + var(--s-xl)); margin-bottom: var(--s-xxl); }
+  .hero-l::before {
+    content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: -100vw; right: -100vw;
+    background: var(--card); border-bottom: 1px solid var(--line);
+  }
+  @media (max-width: 720px) {
+    .hero-l { padding-block: calc(var(--s-xxl) + var(--s-lg)) var(--s-xxl); }
+  }
 
   /* The categories, as the app's pills: one pressed, the rest quiet. */
   .chips { display: flex; flex-wrap: wrap; gap: var(--s-sm); margin-bottom: var(--s-md); }
