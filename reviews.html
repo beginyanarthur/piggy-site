@@ -189,6 +189,25 @@
 
 
   footer { padding-block: var(--s-lg) 72px; color: var(--ink-dim); font-size: 14.5px; display: flex; flex-direction: column; gap: 6px; }
+  /* One footer on every page: who made it, the same links in the same
+     order (the page you are on is marked, not linked away from), and a
+     page's own note last. It sits on the app's night, like the end of the
+     front page, so every page closes the same way. */
+  footer.foot {
+    position: relative; isolation: isolate; padding-block: var(--s-xxl) 72px; margin-top: var(--s-xxl);
+    color: #FFFFFFCC; font-size: 14.5px; display: flex; flex-direction: column; gap: var(--s-sm);
+  }
+  footer.foot::before {
+    content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: -100vw; right: -100vw;
+    background: linear-gradient(#2E3358, #1B1E38);
+  }
+  :root[data-theme="dark"] footer.foot::before { background: linear-gradient(#1B1E38, #0E1024); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) footer.foot::before { background: linear-gradient(#1B1E38, #0E1024); } }
+  .last + footer.foot { margin-top: 0; }
+  footer.foot a { color: #FF9AD5; }
+  footer.foot a[aria-current="page"] { color: #FFFFFF; font-weight: 600; text-decoration: none; }
+  footer.foot .foot-note { color: #FFFFFFA6; }
+  html, body { overflow-x: clip; }
 
   :target { scroll-margin-top: 76px; }
   .skip {
@@ -462,8 +481,9 @@
     <div class="actions"><a class="btn" id="last-btn" href="mailto:beginyan.arthur@gmail.com?subject=Budget%20review%3A%20please%20send%20me%20the%20price&amp;body=Hi%20Artur%2C%0A%0AI%20am%20interested%20in%20a%20budget%20review.%20Please%20send%20me%20the%20price.%0A%0AStart%20or%20check%20up%3A%20%0AArmenian%20or%20English%3A%20%0A"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.52 3.84Q3.8 3.75 11.98 3.75Q20.16 3.75 20.44 3.8Q21.14 3.98 21.68 4.5Q22.22 5.02 22.41 5.72Q22.5 6 22.5 12Q22.5 18 22.41 18.28Q21.98 19.78 20.53 20.16Q20.25 20.25 12 20.25Q3.75 20.25 3.47 20.16Q2.95 20.02 2.48 19.64Q1.83 19.12 1.59 18.28Q1.5 18 1.5 12Q1.5 6 1.59 5.72Q1.73 5.2 2.06 4.78Q2.62 4.03 3.52 3.84ZM20.34 5.34 20.16 5.25H12.09Q4.08 5.25 3.89 5.3Q3.38 5.39 3.09 5.91L3 6.05V12V17.95L3.09 18.09Q3.33 18.47 3.66 18.66L3.84 18.75H12H20.16L20.34 18.66Q20.72 18.47 20.91 18.09L21 17.91V12V6.09L20.91 5.91Q20.72 5.53 20.34 5.34ZM4.92 6.84Q4.92 6.84 4.92 6.84Q5.25 6.66 5.58 6.84Q5.72 6.89 8.86 9.38Q8.86 9.38 12 11.81L15.14 9.38Q18.28 6.89 18.42 6.84Q18.7 6.7 19.01 6.8Q19.31 6.89 19.41 7.17Q19.5 7.31 19.5 7.5Q19.5 7.69 19.43 7.8Q19.36 7.92 19.27 8.06Q19.08 8.2 15.75 10.78Q12.42 13.36 12.33 13.41Q12 13.59 11.67 13.41Q11.58 13.36 8.25 10.78Q4.92 8.2 4.73 8.06Q4.5 7.83 4.5 7.5Q4.5 7.03 4.92 6.84Z"/></svg><span id="last-label">Write to me</span></a></div>
   </section>
 
-  <footer>
-    <p><a href="./">Piggy's home page</a> · <a href="learn.html">Learn</a> · <a href="https://beginyanarthur.github.io/piggy-privacy/" target="_blank" rel="noopener">Privacy policy</a> · <a href="mailto:beginyan.arthur@gmail.com">beginyan.arthur@gmail.com</a></p>
+  <footer class="foot">
+    <p>Made in Armenia by Artur Beginyan.</p>
+    <p class="foot-links"><a href="./">Home</a> · <a href="learn.html">Learn</a> · <a href="reviews.html" aria-current="page">Reviews</a> · <a href="https://beginyanarthur.github.io/piggy-privacy/support.html">Support</a> · <a href="https://beginyanarthur.github.io/piggy-privacy/" target="_blank" rel="noopener">Privacy policy</a> · <a href="mailto:beginyan.arthur@gmail.com">beginyan.arthur@gmail.com</a></p>
   </footer>
 </main>
 <script>

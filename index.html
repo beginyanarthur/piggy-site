@@ -322,6 +322,12 @@
   @media (max-width: 560px) { .fact { grid-template-columns: 1fr; gap: var(--s-xs); } }
 
   footer { padding-block: var(--s-lg) 72px; color: var(--ink-dim); font-size: 14.5px; display: flex; flex-direction: column; gap: 6px; }
+  /* One footer on every page: who made it, the same links in the same
+     order (the page you are on is marked, not linked away from), and a
+     page's own note last. Here it already sits on the navy end band. */
+  footer.foot { gap: var(--s-sm); }
+  footer.foot a[aria-current="page"] { color: var(--ink); font-weight: 600; text-decoration: none; }
+  footer.foot .foot-note { color: var(--ink-muted); }
 
   /*
     Interaction, such as there is of it.
@@ -1142,10 +1148,10 @@
     </ul>
   </section>
 
-  <footer>
+  <footer class="foot">
     <p>Made in Armenia by Artur Beginyan.</p>
-    <p><a href="https://beginyanarthur.github.io/piggy-privacy/" target="_blank" rel="noopener">Privacy policy</a> · <a href="https://beginyanarthur.github.io/piggy-privacy/support.html">Support</a></p>
-    <p>Amounts are Armenian dram (֏).</p>
+    <p class="foot-links"><a href="./" aria-current="page">Home</a> · <a href="learn.html">Learn</a> · <a href="reviews.html">Reviews</a> · <a href="https://beginyanarthur.github.io/piggy-privacy/support.html">Support</a> · <a href="https://beginyanarthur.github.io/piggy-privacy/" target="_blank" rel="noopener">Privacy policy</a> · <a href="mailto:beginyan.arthur@gmail.com">beginyan.arthur@gmail.com</a></p>
+    <p class="foot-note">Amounts are Armenian dram (֏).</p>
   </footer>
   </div>
 

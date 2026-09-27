@@ -190,6 +190,24 @@
 
 
   footer { padding-block: var(--s-lg) 72px; color: var(--ink-dim); font-size: 14.5px; display: flex; flex-direction: column; gap: 6px; }
+  /* One footer on every page: who made it, the same links in the same
+     order (the page you are on is marked, not linked away from), and a
+     page's own note last. It sits on the app's night, like the end of the
+     front page, so every page closes the same way. */
+  footer.foot {
+    position: relative; isolation: isolate; padding-block: var(--s-xxl) 72px; margin-top: var(--s-xxl);
+    color: #FFFFFFCC; font-size: 14.5px; display: flex; flex-direction: column; gap: var(--s-sm);
+  }
+  footer.foot::before {
+    content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: -100vw; right: -100vw;
+    background: linear-gradient(#2E3358, #1B1E38);
+  }
+  :root[data-theme="dark"] footer.foot::before { background: linear-gradient(#1B1E38, #0E1024); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) footer.foot::before { background: linear-gradient(#1B1E38, #0E1024); } }
+  footer.foot a { color: #FF9AD5; }
+  footer.foot a[aria-current="page"] { color: #FFFFFF; font-weight: 600; text-decoration: none; }
+  footer.foot .foot-note { color: #FFFFFFA6; }
+  html, body { overflow-x: clip; }
 
   :target { scroll-margin-top: 76px; }
   .skip {
@@ -474,9 +492,10 @@
     <div class="reader-body"></div>
   </div>
 
-  <footer>
-    <p>These are general ideas, not advice for your situation. For that, talk to someone licensed where you live.</p>
-    <p><a href="./">Piggy's home page</a> · <a href="https://beginyanarthur.github.io/piggy-privacy/support.html">Support</a> · <a href="https://beginyanarthur.github.io/piggy-privacy/" target="_blank" rel="noopener">Privacy policy</a> · <a href="mailto:beginyan.arthur@gmail.com">beginyan.arthur@gmail.com</a></p>
+  <footer class="foot">
+    <p>Made in Armenia by Artur Beginyan.</p>
+    <p class="foot-links"><a href="./">Home</a> · <a href="learn.html" aria-current="page">Learn</a> · <a href="reviews.html">Reviews</a> · <a href="https://beginyanarthur.github.io/piggy-privacy/support.html">Support</a> · <a href="https://beginyanarthur.github.io/piggy-privacy/" target="_blank" rel="noopener">Privacy policy</a> · <a href="mailto:beginyan.arthur@gmail.com">beginyan.arthur@gmail.com</a></p>
+    <p class="foot-note">These are general ideas, not advice for your situation. For that, talk to someone licensed where you live.</p>
   </footer>
 </main>
 <script>
