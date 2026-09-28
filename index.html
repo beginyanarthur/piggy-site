@@ -429,7 +429,7 @@
      height from the window (what is left after the bar, the heading and the
      numbers) and its width follows the screenshot's shape. */
   .orbit {
-    --phone-h: clamp(400px, calc(100svh - 310px), 678px);
+    --phone-h: clamp(360px, calc(100svh - 340px), 678px);
     --phone-w: calc(var(--phone-h) * 1003 / 2000);
     position: relative; display: grid; align-items: start;
     grid-template-columns: minmax(0, 1fr) var(--phone-w) minmax(0, 1fr); column-gap: calc(var(--s-xxl) * 2);
@@ -1007,7 +1007,7 @@
 
   <section id="how">
     <h2>What does a month look like?</h2>
-    <p class="lead-in">Five steps, every month. Tap a number to follow the path.</p>
+    <p class="lead-in">Five steps, at least once a month. Do each as often as suits you: log every purchase, check every week, adjust this month and the next as life changes.</p>
     <div class="orbit">
       <svg class="thread" aria-hidden="true"><path class="thread-p" d=""/><circle class="thread-start" r="5" cx="-20" cy="-20"/><circle class="thread-end" r="6" cx="-20" cy="-20"/><circle class="thread-ring" r="6" cx="-20" cy="-20"/></svg>
       <div class="ot-col left">
