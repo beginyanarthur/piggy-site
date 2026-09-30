@@ -720,7 +720,16 @@
     transition: border-color 150ms ease-out, background-color 150ms ease-out;
   }
   .link-stage:hover { border-color: var(--stage-ink); background: #FFFFFF14; }
-  .stage-note { font-size: 14.5px; color: var(--stage-dim); }
+  /* Join the beta: the page's way in while Piggy is on TestFlight. It opens
+     an email that already says what to send, the Apple ID email TestFlight
+     invites go to and the iPhone model, and Artur answers with the beta
+     terms. No form, because the site collects no addresses. It stands as
+     tall as the App Store badge beside it. */
+  .btn.join { min-height: 64px; padding: 0 var(--s-xl); font-size: 18px; border-radius: var(--r-md); }
+  .stage .btn.join { box-shadow: 0 12px 30px -12px #F45FC0A6; }
+  @media (max-width: 560px) { .btn.join { width: 100%; } }
+  .stage-note { font-size: 14.5px; color: var(--stage-dim); max-width: 30em; text-wrap: balance; }
+  .stage-note a { color: var(--stage-ink); text-underline-offset: 3px; }
 
   /* The phones, in depth. */
   .rig { position: relative; height: clamp(440px, 46vw, 660px); perspective: 1400px; }
@@ -981,13 +990,13 @@
       <h1>Budgeting is not only about counting money</h1>
       <p class="stage-lede"><span>It is about the life you want.</span> <span>When your money has a plan, your mind has room for everything else.</span></p>
       <div class="stage-actions">
+        <a class="btn join" data-join href="mailto:beginyan.arthur@gmail.com?subject=Joining%20the%20Piggy%20beta&amp;body=Hi%20Artur%2C%0A%0AI%20would%20like%20to%20try%20Piggy%20on%20TestFlight.%0A%0AThe%20email%20I%20use%20for%20my%20Apple%20ID%3A%20%0AMy%20iPhone%20model%3A%20%0A"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Join the beta</a>
         <span class="store" role="img" aria-label="Coming soon to the App Store">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6.2" y="2.4" width="11.6" height="19.2" rx="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M10.6 5.5h2.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
           <span><small>Coming soon to the</small>App Store</span>
         </span>
-        <a class="link-stage" href="https://t.me/piggy_research"><svg class="tg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg> Follow on Telegram</a>
       </div>
-      <p class="stage-note">iPhone, iOS 16.4 and later. In closed beta now.</p>
+      <p class="stage-note">iPhone, iOS 16.4 and later. Free while the beta runs, and I reply personally. News on <a href="https://t.me/piggy_research">Telegram</a>.</p>
     </div>
 
     <div class="rig">
@@ -1143,6 +1152,7 @@
     <h2>Ready when you are</h2>
     <p>Piggy is in closed beta on iPhone. Everything is unlocked while it runs, Golden Piggy included.</p>
     <div class="actions">
+      <a class="btn join" data-join href="mailto:beginyan.arthur@gmail.com?subject=Joining%20the%20Piggy%20beta&amp;body=Hi%20Artur%2C%0A%0AI%20would%20like%20to%20try%20Piggy%20on%20TestFlight.%0A%0AThe%20email%20I%20use%20for%20my%20Apple%20ID%3A%20%0AMy%20iPhone%20model%3A%20%0A"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Join the beta</a>
       <span class="store-b" role="img" aria-label="Coming soon to the App Store">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="6.2" y="2.4" width="11.6" height="19.2" rx="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M10.6 5.5h2.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         <span><small>Coming soon to the</small>App Store</span>
@@ -1530,6 +1540,12 @@
       try { localStorage.setItem("piggy-motion", paused ? "paused" : "playing"); } catch (e) {}
     });
   })();
+</script>
+<script>
+  // Count clicks on Join the beta in Clarity, so the site's pull shows.
+  document.querySelectorAll("[data-join]").forEach(function (a) {
+    a.addEventListener("click", function () { if (window.clarity) window.clarity("event", "join_beta_click"); });
+  });
 </script>
 </body>
 </html>
