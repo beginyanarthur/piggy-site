@@ -431,6 +431,11 @@
   /* Draft markers, visible on purpose; they come out when she approves. */
   .draft { align-self: flex-start; padding: 2px 10px; border: 1px dashed var(--pink); border-radius: var(--r-pill); color: var(--pink-ink); font-size: var(--t-caption); font-weight: 600; }
   .draft-name { color: var(--pink-ink); border-bottom: 1px dashed var(--pink); }
+  /* On a narrow phone the header holds the mark, three links and the theme
+     switch; Support steps down to the footer, where every page has it. */
+  @media (max-width: 480px) { .nav a[href$="support.html"] { display: none; } }
+  /* On the smallest phones the snout alone stands for the name. */
+  @media (max-width: 350px) { .brand b { display: none; } }
 </style>
 <!-- Microsoft Clarity: how the pages are used, without cookies (consent denied, so it sets none). -->
 <script>
@@ -452,6 +457,7 @@
     <nav class="nav">
       <a href="learn.html">Learn</a>
       <a href="reviews.html" aria-current="page">Reviews</a>
+      <a href="merch.html">Merch</a>
       <a href="https://beginyanarthur.github.io/piggy-privacy/support.html">Support</a>
     </nav>
     <button class="theme" type="button" id="theme" aria-label="Switch to dark">

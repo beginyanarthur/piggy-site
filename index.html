@@ -949,6 +949,11 @@
   .helps a > span:last-child > span { font-size: var(--t-body-app); color: var(--ink-dim); overflow-wrap: anywhere; }
   @media (max-width: 900px) { .helps { grid-template-columns: 1fr; } }
   @media (prefers-reduced-motion: reduce) { .helps a, .end-link { transition: none; } .helps a:hover, .end-link:hover { transform: none; } }
+  /* On a narrow phone the header holds the mark, three links and the theme
+     switch; Support steps down to the footer, where every page has it. */
+  @media (max-width: 480px) { .nav a[href$="support.html"] { display: none; } }
+  /* On the smallest phones the snout alone stands for the name. */
+  @media (max-width: 350px) { .brand b { display: none; } }
 </style>
 <!-- Microsoft Clarity: how the pages are used, without cookies (consent denied, so it sets none). -->
 <script>
@@ -970,6 +975,7 @@
     <nav class="nav">
       <a href="learn.html">Learn</a>
       <a href="reviews.html">Reviews</a>
+      <a href="merch.html">Merch</a>
       <a href="https://beginyanarthur.github.io/piggy-privacy/support.html">Support</a>
     </nav>
     <button class="theme" type="button" id="theme" aria-label="Switch to dark">
